@@ -86,3 +86,4 @@ A bilingual (**Malayalam + English**) administrative, accounting, general ledger
 - **Safe Public Keys**: The Supabase `anon` key only identifies your project endpoint; PostgreSQL **Row Level Security (RLS)** enforces access control on the database server.
 - **Strict `authenticated` Policies**: Unauthenticated visitors opening your GitHub Pages URL cannot read, insert, update, or delete any council records until they sign in with a valid council staff Email & Password.
 - **Offline Local Mode**: Users without cloud credentials can still test or operate the application locally in browser `localStorage` via Offline Mode.
+

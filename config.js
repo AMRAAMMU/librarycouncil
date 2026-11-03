@@ -19,3 +19,4 @@ window.COUNCIL_SUPABASE_CONFIG = {
   url: "",      // Example: "https://xyzcompany.supabase.co"
   anonKey: ""   // Example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
 };
+
