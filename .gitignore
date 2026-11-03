@@ -1,0 +1,15 @@
+# OS & Editor metadata
+.DS_Store
+Thumbs.db
+desktop.ini
+.vscode/
+.idea/
+
+# Local private secrets (never commit service_role keys!)
+.env
+.env.*
+*.local
+
+# Logs & temp files
+*.log
+tmp/

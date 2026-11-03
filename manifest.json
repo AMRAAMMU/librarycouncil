@@ -1,0 +1,19 @@
+{
+  "name": "താലൂക്ക് ലൈബ്രറി കൗൺസിൽ - Library Council Suite",
+  "short_name": "Library Council",
+  "description": "Taluk Library Council Management, Cash Book & General Ledger Suite",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#0f172a",
+  "theme_color": "#0f766e",
+  "orientation": "any",
+  "icons": [
+    {
+      "src": "./icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
