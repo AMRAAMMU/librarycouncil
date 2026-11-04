@@ -10,7 +10,7 @@
   <!-- Google Fonts: Manrope & Malayalam Font Noto Sans Malayalam -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Gayathri:wght@400;700&family=Noto+Sans+Malayalam:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Gayathri:wght@400;700&family=Noto+Sans+Malayalam:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <!-- Lucide Icons -->
   <script src="https://unpkg.com/lucide@latest"></script>
   <!-- Chart.js -->
@@ -3701,7 +3701,7 @@
       const receiptHtml = `
         <div style="border: 2px solid #0f766e; border-radius: 12px; padding: 22px; background: #ffffff; font-family: 'Manrope', 'Noto Sans Malayalam', sans-serif;">
           <div style="background: #0f766e; color: #ffffff; padding: 14px 18px; border-radius: 8px; text-align: center; margin-bottom: 18px;">
-            <div style="font-size: 11px; font-weight: 700; letter-spacing: 0.08em;">താലൂക്ക് ലൈബ്രറി കൗൺസിൽ</div>
+            <div style="font-size: 11px; font-weight: 700; letter-spacing: normal;">താലൂക്ക് ലൈബ്രറി കൗൺസിൽ</div>
             <div style="font-size: 18px; font-weight: 800; margin-top: 2px;">TALUK LIBRARY COUNCIL - KERALA</div>
             <div style="font-size: 11px; opacity: 0.9; margin-top: 4px;">ഔദ്യോഗിക വരവ് രസീത് / OFFICIAL MONEY RECEIPT</div>
           </div>
@@ -4121,6 +4121,7 @@
           }
           const wrapper = document.createElement('div');
           wrapper.style.fontFamily = "'Manrope', 'Noto Sans Malayalam', sans-serif";
+          wrapper.style.letterSpacing = 'normal';
           wrapper.style.color = '#0f172a';
           wrapper.style.background = '#ffffff';
           wrapper.style.padding = '2px';
@@ -4245,138 +4246,271 @@
     };
 
     window.generateCashBookPDF = async function() {
-      const { income, expense, balance, cashInHand, cashInBank, openingHand, openingBank } = calculateCashTotals();
       const filename = `CashBook_DailyAudit_${Date.now()}.pdf`;
+      const filterMonth = document.getElementById('cb-filter-month')?.value || '';
+      const op = dbState.openingBalance || { date: new Date().toISOString().split('T')[0], cash: 0, bank: 0 };
+      const baseOpHand = parseFloat(op.cash) || 0;
+      const baseOpBank = parseFloat(op.bank) || 0;
+
+      const formatDateDMY = (dStr) => {
+        const s = String(dStr || '').trim();
+        const parts = s.split('-');
+        return parts.length === 3 ? `${parts[2]}-${parts[1]}-${parts[0]}` : (s || '—');
+      };
+
+      const formatAmt2 = (val) => {
+        const num = Number(val) || 0;
+        return new Intl.NumberFormat('en-IN', {
+          minimumFractionDigits: 2,
+          maximumFractionDigits: 2
+        }).format(num);
+      };
+
+      const mlMonths = [
+        'ജനുവരി', 'ഫെബ്രുവരി', 'മാർച്ച്', 'ഏപ്രിൽ', 'മേയ്', 'ജൂൺ',
+        'ജൂലൈ', 'ഓഗസ്റ്റ്', 'സെപ്റ്റംബർ', 'ഒക്ടോബർ', 'നവംബർ', 'ഡിസംബർ'
+      ];
+      const getMonthLabelMl = (ym) => {
+        const [y, m] = String(ym || '').split('-');
+        const mIdx = parseInt(m, 10) - 1;
+        if (y && mIdx >= 0 && mIdx < 12) {
+          return `${y} ${mlMonths[mIdx]} മാസത്തെ ക്യാഷ് ബുക്ക്`;
+        }
+        return 'ഔദ്യോഗിക ക്യാഷ് ബുക്ക് രജിസ്റ്റർ';
+      };
 
       const sorted = sortCashbookChronological(dbState.cashbook);
-      let currentHand = openingHand;
-      let currentBank = openingBank;
 
-      const processed = sorted.map(item => {
+      let periodOpHand = baseOpHand;
+      let periodOpBank = baseOpBank;
+
+      if (filterMonth) {
+        sorted.forEach(item => {
+          if (item.date < `${filterMonth}-01`) {
+            const amt = parseFloat(item.amount) || 0;
+            const isHand = (item.account || 'cash') === 'cash';
+            if (item.type === 'income') {
+              if (isHand) periodOpHand += amt;
+              else periodOpBank += amt;
+            } else {
+              if (isHand) periodOpHand -= amt;
+              else periodOpBank -= amt;
+            }
+          }
+        });
+      }
+
+      const entries = filterMonth
+        ? sorted.filter(item => String(item.date || '').startsWith(filterMonth))
+        : sorted;
+
+      // Determine month banner title
+      const uniqueMonths = [...new Set(entries.map(e => String(e.date || '').slice(0, 7)).filter(Boolean))];
+      const effectiveMonthKey = filterMonth || (uniqueMonths.length === 1 ? uniqueMonths[0] : '');
+      const periodBannerTitle = effectiveMonthKey
+        ? getMonthLabelMl(effectiveMonthKey)
+        : 'ഔദ്യോഗിക ക്യാഷ് ബുക്ക് രജിസ്റ്റർ';
+
+      // Determine Opening B/F date & Closing C/F date
+      let openingDateIso = op.date || new Date().toISOString().split('T')[0];
+      if (filterMonth) {
+        openingDateIso = `${filterMonth}-01`;
+      } else if (entries.length > 0 && entries[0].date && entries[0].date < openingDateIso) {
+        openingDateIso = entries[0].date;
+      }
+
+      let closingDateIso = openingDateIso;
+      if (filterMonth) {
+        const [fy, fm] = filterMonth.split('-').map(Number);
+        if (fy && fm) {
+          const lastDay = new Date(fy, fm, 0).getDate();
+          closingDateIso = `${filterMonth}-${String(lastDay).padStart(2, '0')}`;
+        }
+      } else if (entries.length > 0) {
+        closingDateIso = entries[entries.length - 1].date || openingDateIso;
+      }
+
+      // Build Left (വരവ് / Receipts) and Right (ചെലവ് / Payments) lists
+      const receiptRows = [{
+        date: formatDateDMY(openingDateIso),
+        lf: '',
+        docNo: '',
+        particularsHtml: '<strong>മുന്നിരിപ്പ്</strong>',
+        cash: formatAmt2(periodOpHand),
+        bank: formatAmt2(periodOpBank),
+        isOpening: true
+      }];
+
+      const paymentRows = [];
+      let recCashTotal = 0;
+      let recBankTotal = 0;
+      let payCashTotal = 0;
+      let payBankTotal = 0;
+
+      const formatParticularsHtml = (item) => {
+        const detail = [item.party, item.desc].map(v => String(v || '').trim()).filter(Boolean).join(' - ');
+        const headText = String(item.head || '').trim();
+        const refPart = item.bankRef ? ` <span style="color:#64748b; font-size:8.5px;">[Ref: ${escapeHtml(item.bankRef)}]</span>` : '';
+        if (detail && headText && detail.toLowerCase() !== headText.toLowerCase()) {
+          return `${escapeHtml(detail)} <span style="color:#475569; font-size:9px;">(${escapeHtml(headText)})</span>${refPart}`;
+        }
+        return `${escapeHtml(detail || headText || '—')}${refPart}`;
+      };
+
+      entries.forEach(item => {
         const amt = parseFloat(item.amount) || 0;
         const isInc = item.type === 'income';
         const isHand = (item.account || 'cash') === 'cash';
 
         if (isInc) {
-          if (isHand) currentHand += amt;
-          else currentBank += amt;
-        } else {
-          if (isHand) currentHand -= amt;
-          else currentBank -= amt;
-        }
+          if (isHand) recCashTotal += amt;
+          else recBankTotal += amt;
 
-        return {
-          ...item,
-          runningHand: currentHand,
-          runningBank: currentBank
-        };
-      });
-
-      const grouped = {};
-      processed.forEach(item => {
-        if (!grouped[item.date]) grouped[item.date] = [];
-        grouped[item.date].push(item);
-      });
-
-      const dates = Object.keys(grouped).sort();
-      const rows = [];
-
-      dates.forEach(dateStr => {
-        const entries = grouped[dateStr];
-        const first = entries[0];
-        const isFirstInc = first.type === 'income';
-        const isFirstHand = (first.account || 'cash') === 'cash';
-        const firstAmt = parseFloat(first.amount) || 0;
-
-        const dayOpHand = first.runningHand - (isFirstHand ? (isFirstInc ? firstAmt : -firstAmt) : 0);
-        const dayOpBank = first.runningBank - (!isFirstHand ? (isFirstInc ? firstAmt : -firstAmt) : 0);
-
-        rows.push({
-          _rowStyle: 'op',
-          cells: [
-            dateStr,
-            'മുന്നിരിപ്പ്',
-            '—',
-            '—',
-            'ദിവസത്തെ മുന്നിരിപ്പ് (Day Opening B/F)',
-            `ആകെ: ₹${formatNumber(dayOpHand + dayOpBank)}`,
-            '—',
-            '—',
-            `₹${formatNumber(dayOpHand)}`,
-            `₹${formatNumber(dayOpBank)}`
-          ]
-        });
-
-        let dayInc = 0;
-        let dayExp = 0;
-
-        entries.forEach(item => {
-          const amt = parseFloat(item.amount) || 0;
-          const isInc = item.type === 'income';
-          const isHand = (item.account || 'cash') === 'cash';
-          if (isInc) dayInc += amt;
-          else dayExp += amt;
-
-          const receiptNo = isInc ? ([item.voucher, item.bankRef ? `(${item.bankRef})` : ''].filter(Boolean).join(' ') || '—') : '—';
-          const voucherNo = !isInc ? ([item.voucher, item.bankRef ? `(${item.bankRef})` : ''].filter(Boolean).join(' ') || '—') : '—';
-          const narration = [item.party, item.desc].filter(Boolean).join(' - ') || '—';
-
-          rows.push({
-            cells: [
-              item.date,
-              isHand ? 'കൈവശം (Cash)' : 'ബാങ്ക് (Bank)',
-              receiptNo,
-              voucherNo,
-              item.head,
-              narration,
-              isInc ? `₹${formatNumber(amt)}` : '—',
-              !isInc ? `₹${formatNumber(amt)}` : '—',
-              `₹${formatNumber(item.runningHand)}`,
-              `₹${formatNumber(item.runningBank)}`
-            ]
+          receiptRows.push({
+            date: formatDateDMY(item.date),
+            lf: '',
+            docNo: escapeHtml(item.voucher || ''),
+            particularsHtml: formatParticularsHtml(item),
+            cash: isHand ? formatAmt2(amt) : '',
+            bank: !isHand ? formatAmt2(amt) : '',
+            isOpening: false
           });
-        });
+        } else {
+          if (isHand) payCashTotal += amt;
+          else payBankTotal += amt;
 
-        const last = entries[entries.length - 1];
-        rows.push({
-          _rowStyle: 'close',
-          cells: [
-            dateStr,
-            'നീക്കിയിരിപ്പ്',
-            '—',
-            '—',
-            'ദിവസത്തെ നീക്കിയിരിപ്പ് (Day Closing C/F)',
-            `ആകെ: ₹${formatNumber(last.runningHand + last.runningBank)}`,
-            `₹${formatNumber(dayInc)}`,
-            `₹${formatNumber(dayExp)}`,
-            `₹${formatNumber(last.runningHand)}`,
-            `₹${formatNumber(last.runningBank)}`
-          ]
-        });
+          paymentRows.push({
+            date: formatDateDMY(item.date),
+            lf: '',
+            docNo: escapeHtml(item.voucher || ''),
+            particularsHtml: formatParticularsHtml(item),
+            cash: isHand ? formatAmt2(amt) : '',
+            bank: !isHand ? formatAmt2(amt) : ''
+          });
+        }
       });
 
-      const tableRows = rows.length > 0
-        ? rows
-        : [{ cells: ['—', '—', '—', '—', 'ഇടപാടുകൾ രേഖപ്പെടുത്തിയിട്ടില്ല', '—', '—', '—', `₹${formatNumber(openingHand)}`, `₹${formatNumber(openingBank)}`] }];
+      const closingHand = periodOpHand + recCashTotal - payCashTotal;
+      const closingBank = periodOpBank + recBankTotal - payBankTotal;
+      const closingCombined = closingHand + closingBank;
 
-      const footCells = [
-        'ആകെ നീക്കിയിരിപ്പ് (Grand C/F)', '', '', '', '', `ആകെ: ₹${formatNumber(balance)}`,
-        `₹${formatNumber(income)}`,
-        `₹${formatNumber(expense)}`,
-        `₹${formatNumber(cashInHand)}`,
-        `₹${formatNumber(cashInBank)}`
-      ];
+      const leftGrandCash = periodOpHand + recCashTotal;
+      const leftGrandBank = periodOpBank + recBankTotal;
+      const rightGrandCash = payCashTotal + closingHand;
+      const rightGrandBank = payBankTotal + closingBank;
+
+      const maxLen = Math.max(receiptRows.length, paymentRows.length, 1);
+      const cellBorder = '1px solid #64748b';
+      const centerDivider = '2.2px solid #0f172a';
+
+      let pairedBodyHtml = '';
+      for (let i = 0; i < maxLen; i++) {
+        const r = receiptRows[i] || null;
+        const p = paymentRows[i] || null;
+        const rAmtStyle = r && r.isOpening
+          ? 'font-weight: 800; color: #b91c1c;'
+          : 'font-weight: 600; color: #0f172a;';
+
+        pairedBodyHtml += `
+          <tr style="page-break-inside: avoid; background: #ffffff;">
+            <td style="padding: 5.5px 5px; border: ${cellBorder}; font-size: 9.5px; white-space: nowrap; text-align: center; vertical-align: top;">${r ? escapeHtml(r.date) : ''}</td>
+            <td style="padding: 5.5px 4px; border: ${cellBorder}; font-size: 9.5px; text-align: center; vertical-align: top;">${r ? escapeHtml(r.lf) : ''}</td>
+            <td style="padding: 5.5px 5px; border: ${cellBorder}; font-size: 9.5px; text-align: center; vertical-align: top; word-break: break-word;">${r ? r.docNo : ''}</td>
+            <td style="padding: 5.5px 6px; border: ${cellBorder}; font-size: 9.5px; text-align: left; vertical-align: top; word-break: break-word;">${r ? r.particularsHtml : ''}</td>
+            <td style="padding: 5.5px 6px; border: ${cellBorder}; font-size: 9.5px; text-align: right; white-space: nowrap; vertical-align: top; ${rAmtStyle}">${r ? escapeHtml(r.cash) : ''}</td>
+            <td style="padding: 5.5px 6px; border: ${cellBorder}; border-right: ${centerDivider}; font-size: 9.5px; text-align: right; white-space: nowrap; vertical-align: top; ${rAmtStyle}">${r ? escapeHtml(r.bank) : ''}</td>
+
+            <td style="padding: 5.5px 5px; border: ${cellBorder}; font-size: 9.5px; white-space: nowrap; text-align: center; vertical-align: top;">${p ? escapeHtml(p.date) : ''}</td>
+            <td style="padding: 5.5px 4px; border: ${cellBorder}; font-size: 9.5px; text-align: center; vertical-align: top;">${p ? escapeHtml(p.lf) : ''}</td>
+            <td style="padding: 5.5px 5px; border: ${cellBorder}; font-size: 9.5px; text-align: center; vertical-align: top; word-break: break-word;">${p ? p.docNo : ''}</td>
+            <td style="padding: 5.5px 6px; border: ${cellBorder}; font-size: 9.5px; text-align: left; vertical-align: top; word-break: break-word;">${p ? p.particularsHtml : ''}</td>
+            <td style="padding: 5.5px 6px; border: ${cellBorder}; font-size: 9.5px; font-weight: 600; color: #0f172a; text-align: right; white-space: nowrap; vertical-align: top;">${p ? escapeHtml(p.cash) : ''}</td>
+            <td style="padding: 5.5px 6px; border: ${cellBorder}; font-size: 9.5px; font-weight: 600; color: #0f172a; text-align: right; white-space: nowrap; vertical-align: top;">${p ? escapeHtml(p.bank) : ''}</td>
+          </tr>
+        `;
+      }
+
+      // Closing Balance C/F row on Payments side
+      pairedBodyHtml += `
+        <tr style="page-break-inside: avoid; background: #f8fafc;">
+          <td style="padding: 6px 5px; border: ${cellBorder}; font-size: 9.5px;"></td>
+          <td style="padding: 6px 4px; border: ${cellBorder}; font-size: 9.5px;"></td>
+          <td style="padding: 6px 5px; border: ${cellBorder}; font-size: 9.5px;"></td>
+          <td style="padding: 6px 6px; border: ${cellBorder}; font-size: 9.5px;"></td>
+          <td style="padding: 6px 6px; border: ${cellBorder}; font-size: 9.5px;"></td>
+          <td style="padding: 6px 6px; border: ${cellBorder}; border-right: ${centerDivider}; font-size: 9.5px;"></td>
+
+          <td style="padding: 6px 5px; border: ${cellBorder}; font-size: 9.5px; white-space: nowrap; text-align: center; font-weight: 700; color: #0f766e;">${escapeHtml(formatDateDMY(closingDateIso))}</td>
+          <td style="padding: 6px 4px; border: ${cellBorder}; font-size: 9.5px;"></td>
+          <td style="padding: 6px 5px; border: ${cellBorder}; font-size: 9.5px;"></td>
+          <td style="padding: 6px 6px; border: ${cellBorder}; font-size: 9.5px; font-weight: 800; color: #0f766e;">നീക്കിയിരിപ്പ്</td>
+          <td style="padding: 6px 6px; border: ${cellBorder}; font-size: 9.5px; font-weight: 800; color: #0f766e; text-align: right; white-space: nowrap;">${escapeHtml(formatAmt2(closingHand))}</td>
+          <td style="padding: 6px 6px; border: ${cellBorder}; font-size: 9.5px; font-weight: 800; color: #0f766e; text-align: right; white-space: nowrap;">${escapeHtml(formatAmt2(closingBank))}</td>
+        </tr>
+      `;
+
+      const doubleColumnCashBookHtml = `
+        <div style="background: #d9ead3; border: 1.5px solid #0f766e; color: #0f172a; text-align: center; font-weight: 800; font-size: 11.5px; padding: 5px 10px; margin-bottom: 8px; border-radius: 4px;">
+          ${escapeHtml(periodBannerTitle)}
+        </div>
+        <table style="width: 100%; border-collapse: collapse; table-layout: fixed; border: 2px solid #0f172a; margin-bottom: 14px;">
+          <colgroup>
+            <col style="width: 7.2%;" />
+            <col style="width: 3.8%;" />
+            <col style="width: 5.5%;" />
+            <col style="width: 18.5%;" />
+            <col style="width: 7.5%;" />
+            <col style="width: 7.5%;" />
+            <col style="width: 7.2%;" />
+            <col style="width: 3.8%;" />
+            <col style="width: 5.5%;" />
+            <col style="width: 18.5%;" />
+            <col style="width: 7.5%;" />
+            <col style="width: 7.5%;" />
+          </colgroup>
+          <thead>
+            <tr>
+              <th colspan="6" style="padding: 7px 8px; background: #0f766e; color: #ffffff; font-size: 11.5px; font-weight: 700; letter-spacing: normal; text-align: center; border: 1px solid #0f172a; border-right: ${centerDivider};">വരവ്</th>
+              <th colspan="6" style="padding: 7px 8px; background: #0f766e; color: #ffffff; font-size: 11.5px; font-weight: 700; letter-spacing: normal; text-align: center; border: 1px solid #0f172a;">ചെലവ്</th>
+            </tr>
+            <tr style="background: #f1f5f9; color: #0f172a; letter-spacing: normal;">
+              <th style="padding: 6px 4px; border: 1px solid #334155; font-size: 9.5px; font-weight: 700; text-align: center;">തീയതി</th>
+              <th style="padding: 6px 2px; border: 1px solid #334155; font-size: 8.5px; font-weight: 700; text-align: center;">എൽ.എഫ്.<br/>No</th>
+              <th style="padding: 6px 3px; border: 1px solid #334155; font-size: 9px; font-weight: 700; text-align: center;">രസീത്<br/>No</th>
+              <th style="padding: 6px 6px; border: 1px solid #334155; font-size: 9.5px; font-weight: 700; text-align: center;">വിവരണം</th>
+              <th style="padding: 6px 5px; border: 1px solid #334155; font-size: 9.5px; font-weight: 700; text-align: right;">കൈവശം<br/>(₹)</th>
+              <th style="padding: 6px 5px; border: 1px solid #334155; border-right: ${centerDivider}; font-size: 9.5px; font-weight: 700; text-align: right;">ബാങ്ക്<br/>(₹)</th>
+
+              <th style="padding: 6px 4px; border: 1px solid #334155; font-size: 9.5px; font-weight: 700; text-align: center;">തീയതി</th>
+              <th style="padding: 6px 2px; border: 1px solid #334155; font-size: 8.5px; font-weight: 700; text-align: center;">എൽ.എഫ്.<br/>No</th>
+              <th style="padding: 6px 3px; border: 1px solid #334155; font-size: 9px; font-weight: 700; text-align: center;">വൗച്ചർ<br/>No</th>
+              <th style="padding: 6px 6px; border: 1px solid #334155; font-size: 9.5px; font-weight: 700; text-align: center;">വിവരണം</th>
+              <th style="padding: 6px 5px; border: 1px solid #334155; font-size: 9.5px; font-weight: 700; text-align: right;">കൈവശം<br/>(₹)</th>
+              <th style="padding: 6px 5px; border: 1px solid #334155; font-size: 9.5px; font-weight: 700; text-align: right;">ബാങ്ക്<br/>(₹)</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${pairedBodyHtml}
+          </tbody>
+          <tfoot>
+            <tr style="background: #ecfdf5; font-weight: 800; color: #064e3b; page-break-inside: avoid;">
+              <td colspan="4" style="padding: 6.5px 6px; border: 1.5px solid #0f172a; font-size: 10px; text-align: right;">ആകെ തുക</td>
+              <td style="padding: 6.5px 6px; border: 1.5px solid #0f172a; font-size: 9.5px; text-align: right; white-space: nowrap;">${escapeHtml(formatAmt2(leftGrandCash))}</td>
+              <td style="padding: 6.5px 6px; border: 1.5px solid #0f172a; border-right: ${centerDivider}; font-size: 9.5px; text-align: right; white-space: nowrap;">${escapeHtml(formatAmt2(leftGrandBank))}</td>
+
+              <td colspan="4" style="padding: 6.5px 6px; border: 1.5px solid #0f172a; font-size: 10px; text-align: right;">ആകെ തുക</td>
+              <td style="padding: 6.5px 6px; border: 1.5px solid #0f172a; font-size: 9.5px; text-align: right; white-space: nowrap;">${escapeHtml(formatAmt2(rightGrandCash))}</td>
+              <td style="padding: 6.5px 6px; border: 1.5px solid #0f172a; font-size: 9.5px; text-align: right; white-space: nowrap;">${escapeHtml(formatAmt2(rightGrandBank))}</td>
+            </tr>
+          </tfoot>
+        </table>
+      `;
 
       const fullHtml = buildReportDocumentHtml(
         'ക്യാഷ് ബുക്ക് & ദിവസേന ഓഡിറ്റ്',
         'Official Cash Book & Daily Audit',
-        `മുന്നിരിപ്പ്: ₹${formatNumber(openingHand + openingBank)} | നീക്കിയിരിപ്പ്: ₹${formatNumber(balance)} (കൈവശം: ₹${formatNumber(cashInHand)} | ബാങ്ക്: ₹${formatNumber(cashInBank)})`,
-        buildStyledTableHtml(
-          ['തീയതി', 'മോഡ്', 'രസീത് No', 'വൗച്ചർ No', 'അക്കൗണ്ട് ഹെഡ്', 'വിവരണം', 'വരവ് (₹)', 'ചെലവ് (₹)', 'കൈവശം (₹)', 'ബാങ്ക് (₹)'],
-          tableRows,
-          footCells,
-          [6, 7, 8, 9]
-        )
+        `മുന്നിരിപ്പ്: ₹${formatNumber(periodOpHand + periodOpBank)} | നീക്കിയിരിപ്പ്: ₹${formatNumber(closingCombined)} (കൈവശം: ₹${formatNumber(closingHand)} | ബാങ്ക്: ₹${formatNumber(closingBank)})`,
+        doubleColumnCashBookHtml
       );
 
       await exportHtmlToPDF(fullHtml, filename, 'landscape');
