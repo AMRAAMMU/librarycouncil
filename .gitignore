@@ -14,3 +14,6 @@ desktop.ini
 *.log
 tmp/
 
+
+# Scratch and temporary agent files
+scratch/
