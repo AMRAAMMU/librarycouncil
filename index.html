@@ -21,6 +21,11 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+  <script>
+    if (!window.html2pdf) {
+      document.write('<script src="https://cdn.jsdelivr.net/npm/html2pdf.js@0.10.1/dist/html2pdf.bundle.min.js"><\/script>');
+    }
+  </script>
   <!-- SheetJS (XLSX) for Excel import & export -->
   <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
   <!-- Supabase JS Client -->
@@ -275,7 +280,12 @@
     }
 
     @media print {
-      .no-print, nav, aside, #sidebar, header, .modal-backdrop, button, .action-btn {
+      html, body, .app-shell, .flex-1, main, #main-content {
+        height: auto !important;
+        overflow: visible !important;
+        max-height: none !important;
+      }
+      .no-print, nav, aside, #sidebar, header, #sidebar-backdrop, #toast-container, .modal-backdrop, button, .action-btn {
         display: none !important;
       }
       .print-only {
@@ -3627,6 +3637,9 @@
     };
 
     window.closeModal = function(modalId) {
+      if (modalId === 'modal-doc-viewer' && typeof cleanupViewerBlobUrl === 'function') {
+        cleanupViewerBlobUrl();
+      }
       if (modalId === 'modal-cash' && typeof window.closeAllCashCombos === 'function') {
         window.closeAllCashCombos();
       }
@@ -5786,32 +5799,32 @@
         let dayOpBank = firstEntry.runningBank - (!isFirstHand ? (isFirstInc ? firstAmt : -firstAmt) : 0);
 
         const dayOpRow = document.createElement('tr');
-        dayOpRow.className = 'summary-audit-row summary-audit-row--op bg-amber-50/70 border-t-2 border-amber-200/60 font-semibold text-slate-800';
+        dayOpRow.className = 'summary-audit-row summary-audit-row--op bg-red-50/70 border-t-2 border-red-200/80 font-bold text-red-700';
         dayOpRow.innerHTML = `
-          <td data-label="തീയതി" class="p-3 font-mono tabular-nums text-xs text-amber-900 whitespace-nowrap font-bold">
+          <td data-label="തീയതി" class="p-3 font-mono tabular-nums text-xs text-red-700 whitespace-nowrap font-bold">
             <span class="inline-flex items-center gap-1.5">
-              <i data-lucide="calendar" class="w-3.5 h-3.5 text-amber-700 flex-shrink-0"></i>
+              <i data-lucide="calendar" class="w-3.5 h-3.5 text-red-600 flex-shrink-0"></i>
               <span>${escapeHtml(dateStr)}</span>
             </span>
           </td>
           <td class="p-3 whitespace-nowrap mobile-hide-dash">
-            <span class="inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-bold bg-amber-200 text-amber-900">
+            <span class="inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-bold bg-red-100 text-red-700 border border-red-200">
               ദിവസത്തെ മുന്നിരിപ്പ്
             </span>
           </td>
-          <td class="p-3 font-mono text-xs text-slate-400 mobile-hide-dash">—</td>
-          <td class="p-3 font-mono text-xs text-slate-400 mobile-hide-dash">—</td>
-          <td data-label="മുന്നിരിപ്പ് (B/F)" class="p-3 font-bold text-amber-900" colspan="2">
+          <td class="p-3 font-mono text-xs text-red-300 mobile-hide-dash">—</td>
+          <td class="p-3 font-mono text-xs text-red-300 mobile-hide-dash">—</td>
+          <td data-label="മുന്നിരിപ്പ് (B/F)" class="p-3 font-bold text-red-700" colspan="2">
             <div class="min-w-0">
-              <span>ദിവസത്തെ മുന്നിരിപ്പ് (Day Opening Balance B/F)</span>
-              <span class="text-xs font-normal text-amber-700 md:ml-2 block md:inline tabular-nums">ആകെ: ₹${formatNumber(dayOpHand + dayOpBank)}</span>
+              <span class="text-red-700 font-bold">ദിവസത്തെ മുന്നിരിപ്പ് (Day Opening Balance B/F)</span>
+              <span class="text-xs font-bold text-red-600 md:ml-2 block md:inline tabular-nums">ആകെ: ₹${formatNumber(dayOpHand + dayOpBank)}</span>
             </div>
           </td>
-          <td class="p-3 text-right font-mono text-slate-400 mobile-hide-dash">—</td>
-          <td class="p-3 text-right font-mono text-slate-400 mobile-hide-dash">—</td>
-          <td data-label="കൈവശം (Hand)" class="p-3 text-right font-bold font-mono tabular-nums whitespace-nowrap text-amber-900">₹${formatNumber(dayOpHand)}</td>
-          <td data-label="ബാങ്ക് (Bank)" class="p-3 text-right font-bold font-mono tabular-nums whitespace-nowrap text-cyan-900 no-mobile-border">₹${formatNumber(dayOpBank)}</td>
-          <td class="p-3 text-center text-slate-300 mobile-hide-dash">—</td>
+          <td class="p-3 text-right font-mono text-red-300 mobile-hide-dash">—</td>
+          <td class="p-3 text-right font-mono text-red-300 mobile-hide-dash">—</td>
+          <td data-label="കൈവശം (Hand)" class="p-3 text-right font-black font-mono tabular-nums whitespace-nowrap text-red-700">₹${formatNumber(dayOpHand)}</td>
+          <td data-label="ബാങ്ക് (Bank)" class="p-3 text-right font-black font-mono tabular-nums whitespace-nowrap text-red-700 no-mobile-border">₹${formatNumber(dayOpHand)}</td>
+          <td class="p-3 text-center text-red-300 mobile-hide-dash">—</td>
         `;
         tbody.appendChild(dayOpRow);
 
@@ -5897,29 +5910,29 @@
         const dayCloseBank = lastEntry.runningBank;
 
         const dayCloseRow = document.createElement('tr');
-        dayCloseRow.className = 'summary-audit-row summary-audit-row--close bg-teal-50/80 border-b border-teal-200/80 font-semibold text-slate-800 text-xs';
+        dayCloseRow.className = 'summary-audit-row summary-audit-row--close bg-red-50/70 border-b-2 border-red-200/80 font-bold text-red-700 text-xs';
         dayCloseRow.innerHTML = `
-          <td data-label="തീയതി" class="p-3 font-mono tabular-nums text-xs text-teal-900 whitespace-nowrap font-bold md:pl-4">
+          <td data-label="തീയതി" class="p-3 font-mono tabular-nums text-xs text-red-700 whitespace-nowrap font-bold md:pl-4">
             ${escapeHtml(dateStr)} സമാപനം
           </td>
           <td class="p-3 whitespace-nowrap mobile-hide-dash">
-            <span class="inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-bold bg-teal-200 text-teal-900">
+            <span class="inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-bold bg-red-100 text-red-700 border border-red-200">
               ദിവസത്തെ നീക്കിയിരിപ്പ്
             </span>
           </td>
-          <td class="p-3 font-mono text-slate-400 mobile-hide-dash">—</td>
-          <td class="p-3 font-mono text-slate-400 mobile-hide-dash">—</td>
-          <td data-label="നീക്കിയിരിപ്പ് (C/F)" class="p-3 font-bold text-teal-900" colspan="2">
+          <td class="p-3 font-mono text-red-300 mobile-hide-dash">—</td>
+          <td class="p-3 font-mono text-red-300 mobile-hide-dash">—</td>
+          <td data-label="നീക്കിയിരിപ്പ് (C/F)" class="p-3 font-bold text-red-700" colspan="2">
             <div class="min-w-0">
-              <span>ദിവസത്തെ നീക്കിയിരിപ്പ് (Day Closing Balance C/F)</span>
-              <span class="text-xs font-normal text-teal-700 md:ml-2 block md:inline tabular-nums">ആകെ: ₹${formatNumber(dayCloseHand + dayCloseBank)}</span>
+              <span class="text-red-700 font-bold">ദിവസത്തെ നീക്കിയിരിപ്പ് (Day Closing Balance C/F)</span>
+              <span class="text-xs font-bold text-red-600 md:ml-2 block md:inline tabular-nums">ആകെ: ₹${formatNumber(dayCloseHand + dayCloseBank)}</span>
             </div>
           </td>
           <td data-label="ദിവസത്തെ വരവ്" class="p-3 text-right font-bold tabular-nums whitespace-nowrap text-emerald-700">₹${formatNumber(dayIncome)}</td>
           <td data-label="ദിവസത്തെ ചെലവ്" class="p-3 text-right font-bold tabular-nums whitespace-nowrap text-rose-700">₹${formatNumber(dayExpense)}</td>
-          <td data-label="കൈവശം (Hand)" class="p-3 text-right font-black font-mono tabular-nums whitespace-nowrap text-amber-900">₹${formatNumber(dayCloseHand)}</td>
-          <td data-label="ബാങ്ക് (Bank)" class="p-3 text-right font-black font-mono tabular-nums whitespace-nowrap text-cyan-900 no-mobile-border">₹${formatNumber(dayCloseBank)}</td>
-          <td class="p-3 text-center text-slate-300 mobile-hide-dash">—</td>
+          <td data-label="കൈവശം (Hand)" class="p-3 text-right font-black font-mono tabular-nums whitespace-nowrap text-red-700">₹${formatNumber(dayCloseHand)}</td>
+          <td data-label="ബാങ്ക് (Bank)" class="p-3 text-right font-black font-mono tabular-nums whitespace-nowrap text-red-700 no-mobile-border">₹${formatNumber(dayCloseBank)}</td>
+          <td class="p-3 text-center text-red-300 mobile-hide-dash">—</td>
         `;
         tbody.appendChild(dayCloseRow);
       });
@@ -6977,33 +6990,77 @@
       if (window.lucide) lucide.createIcons();
     };
 
+    // Helper to safely convert Base64 Data URL to a native Blob URL (prevents Chrome blank iframe bug)
+    function dataUrlToBlob(dataUrl) {
+      if (!dataUrl || typeof dataUrl !== 'string') return null;
+      if (!dataUrl.startsWith('data:')) return null;
+      try {
+        const parts = dataUrl.split(';base64,');
+        if (parts.length < 2) return null;
+        const contentType = (parts[0] || '').replace('data:', '') || 'application/pdf';
+        const base64Data = parts[1] || '';
+        const byteCharacters = atob(base64Data);
+        const byteNumbers = new Array(byteCharacters.length);
+        for (let i = 0; i < byteCharacters.length; i++) {
+          byteNumbers[i] = byteCharacters.charCodeAt(i);
+        }
+        const byteArray = new Uint8Array(byteNumbers);
+        return new Blob([byteArray], { type: contentType });
+      } catch (e) {
+        console.warn('Error converting dataUrl to Blob:', e);
+        return null;
+      }
+    }
+
+    window.currentViewerBlobUrl = null;
+    function cleanupViewerBlobUrl() {
+      if (window.currentViewerBlobUrl) {
+        try {
+          URL.revokeObjectURL(window.currentViewerBlobUrl);
+        } catch (e) {}
+        window.currentViewerBlobUrl = null;
+      }
+    }
+
     window.showDocAttachmentViewer = function(dataUrl, name, type, title, docId) {
+      cleanupViewerBlobUrl();
+
       const titleEl = document.getElementById('doc-viewer-title');
       const subEl = document.getElementById('doc-viewer-sub');
       const dlEl = document.getElementById('doc-viewer-download');
       const openTabEl = document.getElementById('doc-viewer-open-tab');
       const contentEl = document.getElementById('doc-viewer-content');
 
+      const aType = (type || '').toLowerCase();
+      const isPdf = aType.includes('pdf') || (dataUrl && dataUrl.startsWith('data:application/pdf')) || (name || '').toLowerCase().endsWith('.pdf');
+      const isImg = aType.startsWith('image/') || (dataUrl && dataUrl.startsWith('data:image/')) || /\.(png|jpe?g|webp|gif|svg)$/i.test(name || '');
+      const isWord = aType.includes('msword') || aType.includes('wordprocessing') || /\.(doc|docx)$/i.test(name || '');
+
+      let targetUrl = dataUrl;
+      if (isPdf && dataUrl && dataUrl.startsWith('data:')) {
+        const blob = dataUrlToBlob(dataUrl);
+        if (blob) {
+          targetUrl = URL.createObjectURL(blob);
+          window.currentViewerBlobUrl = targetUrl;
+        }
+      }
+
       if (titleEl) titleEl.textContent = title;
       if (subEl) subEl.textContent = name;
 
       if (dlEl) {
         dlEl.classList.remove('hidden');
-        dlEl.href = dataUrl;
-        dlEl.download = name || 'attachment';
+        dlEl.href = targetUrl;
+        dlEl.download = name || (isPdf ? 'document.pdf' : 'attachment');
       }
 
       if (openTabEl) {
         openTabEl.classList.remove('hidden');
-        openTabEl.href = dataUrl;
+        openTabEl.href = targetUrl;
+        openTabEl.target = '_blank';
       }
 
       if (!contentEl) return;
-      const aType = (type || '').toLowerCase();
-      const isPdf = aType.includes('pdf') || dataUrl.startsWith('data:application/pdf') || (name || '').toLowerCase().endsWith('.pdf');
-      const isImg = aType.startsWith('image/') || dataUrl.startsWith('data:image/') || /\.(png|jpe?g|webp|gif|svg)$/i.test(name || '');
-
-      const isWord = aType.includes('msword') || aType.includes('wordprocessing') || /\.(doc|docx)$/i.test(name || '');
 
       if (isWord) {
         contentEl.innerHTML = `
@@ -7014,7 +7071,7 @@
             <h4 class="font-bold text-slate-800 text-base mb-1">${escapeHtml(name)}</h4>
             <p class="text-xs text-slate-500 mb-4 leading-relaxed">ഈ മൈക്രോസോഫ്റ്റ് വേർഡ് (.doc) ഫയൽ ഡൗൺലോഡ് ചെയ്ത് MS Word, LibreOffice അല്ലെങ്കിൽ Google Docs-ൽ എഡിറ്റ് ചെയ്യാം.</p>
             <div class="flex items-center justify-center gap-2">
-              <a href="${dataUrl}" download="${escapeHtml(name)}" class="ui-btn px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold shadow-xs inline-flex items-center gap-2">
+              <a href="${targetUrl}" download="${escapeHtml(name)}" class="ui-btn px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold shadow-xs inline-flex items-center gap-2">
                 <i data-lucide="download" class="w-4 h-4"></i>
                 <span>Word (.doc) ഫയൽ ഡൗൺലോഡ് ചെയ്യുക</span>
               </a>
@@ -7024,24 +7081,47 @@
       } else if (isPdf) {
         contentEl.innerHTML = `
           <div class="w-full h-full flex flex-col">
-            <iframe src="${dataUrl}" class="w-full h-[68vh] rounded-xl border border-slate-200 bg-white shadow-xs"></iframe>
+            <div class="mb-2 flex items-center justify-between text-xs text-slate-600 bg-slate-50 p-2 sm:p-2.5 rounded-xl border border-slate-200 no-print">
+              <span class="truncate font-semibold text-slate-700">📄 ${escapeHtml(name)}</span>
+              <div class="flex items-center gap-3 flex-shrink-0">
+                <a href="${targetUrl}" target="_blank" class="text-emerald-700 hover:text-emerald-800 font-bold flex items-center gap-1 transition">
+                  <i data-lucide="external-link" class="w-3.5 h-3.5"></i> പുതിയ ടാബിൽ തുറക്കുക
+                </a>
+                <a href="${targetUrl}" download="${escapeHtml(name)}" class="text-blue-700 hover:text-blue-800 font-bold flex items-center gap-1 transition">
+                  <i data-lucide="download" class="w-3.5 h-3.5"></i> ഡൗൺലോഡ്
+                </a>
+              </div>
+            </div>
+            <object data="${targetUrl}" type="application/pdf" class="w-full h-[66vh] rounded-xl border border-slate-200 bg-white shadow-xs">
+              <iframe src="${targetUrl}" class="w-full h-full rounded-xl border-0">
+                <div class="p-8 text-center bg-slate-50 rounded-xl">
+                  <i data-lucide="file-text" class="w-12 h-12 text-slate-400 mx-auto mb-2"></i>
+                  <p class="text-sm text-slate-700 font-bold mb-1">ബ്രൗസറിൽ നേരിട്ട് PDF പ്രിവ്യൂ കാണാൻ സാധിക്കുന്നില്ലെങ്കിൽ</p>
+                  <p class="text-xs text-slate-500 mb-4">താഴെ കാണുന്ന ബട്ടൺ ക്ലിക്ക് ചെയ്ത് പുതിയ ടാബിൽ നേരിട്ട് തുറക്കുകയോ ഡൗൺലോഡ് ചെയ്യുകയോ ചെയ്യാം.</p>
+                  <div class="flex items-center justify-center gap-2">
+                    <a href="${targetUrl}" target="_blank" class="ui-btn px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-semibold">പുതിയ ടാബിൽ തുറക്കുക</a>
+                    <a href="${targetUrl}" download="${escapeHtml(name)}" class="ui-btn px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-semibold">ഡൗൺലോഡ് ചെയ്യുക</a>
+                  </div>
+                </div>
+              </iframe>
+            </object>
           </div>
         `;
       } else if (isImg) {
         contentEl.innerHTML = `
           <div class="p-3 w-full flex items-center justify-center overflow-auto max-h-[70vh]">
-            <img src="${dataUrl}" alt="${escapeHtml(name)}" class="max-h-[66vh] max-w-full object-contain rounded-xl shadow-md border border-slate-200" />
+            <img src="${targetUrl}" alt="${escapeHtml(name)}" class="max-h-[66vh] max-w-full object-contain rounded-xl shadow-md border border-slate-200" />
           </div>
         `;
       } else {
         contentEl.innerHTML = `
           <div class="p-8 text-center">
-            <div class="w-14 h-14 rounded-2xl bg-emerald-50 text-emerald-600 border border-emerald-200 flex items-center justify-center mx-auto mb-3 shadow-xs">
-              <i data-lucide="file-check" class="w-7 h-7"></i>
+            <div class="w-16 h-16 rounded-2xl bg-slate-100 text-slate-400 flex items-center justify-center mx-auto mb-3">
+              <i data-lucide="file" class="w-8 h-8"></i>
             </div>
-            <div class="font-bold text-slate-800 text-sm mb-1">${escapeHtml(name)}</div>
-            <div class="text-xs text-slate-500 mb-4">ഈ ഫയൽ തരം നേരിട്ട് പ്രിവ്യൂ ചെയ്യാൻ കഴിയില്ല. ഡൗൺലോഡ് ചെയ്ത് തുറക്കുക.</div>
-            <a href="${dataUrl}" download="${escapeHtml(name)}" class="ui-btn px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold shadow-xs inline-flex items-center gap-2">
+            <h4 class="font-bold text-slate-800 text-base mb-1">${escapeHtml(name)}</h4>
+            <p class="text-xs text-slate-500 mb-4">ഈ ഫയൽ തരം നേരിട്ട് പ്രിവ്യൂ ചെയ്യാൻ സാധ്യമല്ല. താഴെ കാണുന്ന ബട്ടൺ ക്ലിക്ക് ചെയ്ത് ഡൗൺലോഡ് ചെയ്യാം.</p>
+            <a href="${targetUrl}" download="${escapeHtml(name)}" class="ui-btn px-4 py-2 bg-slate-900 text-white text-xs font-semibold shadow-xs inline-flex items-center gap-2">
               <i data-lucide="download" class="w-4 h-4"></i>
               <span>ഫയൽ ഡൗൺലോഡ് ചെയ്യുക</span>
             </a>
@@ -9142,7 +9222,7 @@ window.generateFilesPDF = async function() {
     // ==========================================
     async function exportHtmlToPDF(htmlMarkup, filename, orientation = 'portrait', fallbackFn = null) {
       if (window.html2pdf) {
-        let wrapper = null;
+        let overlay = null;
         try {
           if (document.fonts && document.fonts.load) {
             try {
@@ -9157,36 +9237,78 @@ window.generateFilesPDF = async function() {
               console.warn('Font load check warning:', fontErr);
             }
           }
-          wrapper = document.createElement('div');
-          wrapper.id = 'pdf-render-sandbox';
-          wrapper.style.position = 'fixed';
-          wrapper.style.left = '-99999px';
-          wrapper.style.top = '0';
-          wrapper.style.width = orientation === 'landscape' ? '1120px' : '794px';
-          wrapper.style.fontFamily = "'Noto Sans Malayalam', 'Nirmala UI', 'Manrope', sans-serif";
-          wrapper.style.letterSpacing = 'normal';
-          wrapper.style.color = '#0f172a';
-          wrapper.style.background = '#ffffff';
-          wrapper.style.padding = '8px';
-          wrapper.innerHTML = htmlMarkup;
-          document.body.appendChild(wrapper);
+
+          // Create a clean, visible, top-level overlay so html2canvas NEVER captures negative/blank canvas
+          overlay = document.createElement('div');
+          overlay.id = 'pdf-export-overlay';
+          overlay.style.position = 'fixed';
+          overlay.style.top = '0';
+          overlay.style.left = '0';
+          overlay.style.width = '100vw';
+          overlay.style.height = '100vh';
+          overlay.style.zIndex = '9999999';
+          overlay.style.background = '#ffffff';
+          overlay.style.overflow = 'auto';
+          overlay.style.display = 'flex';
+          overlay.style.flexDirection = 'column';
+          overlay.style.alignItems = 'center';
+          overlay.style.justifyContent = 'flex-start';
+          overlay.style.padding = '12px';
+
+          // Visual loading pill while html2pdf processes
+          const loader = document.createElement('div');
+          loader.className = 'no-print';
+          loader.style.marginBottom = '12px';
+          loader.style.padding = '8px 18px';
+          loader.style.background = '#0f766e';
+          loader.style.color = '#ffffff';
+          loader.style.borderRadius = '9999px';
+          loader.style.fontSize = '12px';
+          loader.style.fontWeight = '700';
+          loader.style.boxShadow = '0 4px 12px rgba(15, 23, 42, 0.15)';
+          loader.innerHTML = '📄 PDF തയ്യാറാക്കുന്നു... (Generating PDF, please wait...)';
+          overlay.appendChild(loader);
+
+          const docBox = document.createElement('div');
+          docBox.id = 'pdf-render-box';
+          docBox.style.width = orientation === 'landscape' ? '1120px' : '794px';
+          docBox.style.maxWidth = '100%';
+          docBox.style.boxSizing = 'border-box';
+          docBox.style.fontFamily = "'Noto Sans Malayalam', 'Nirmala UI', 'Manrope', sans-serif";
+          docBox.style.letterSpacing = 'normal';
+          docBox.style.color = '#0f172a';
+          docBox.style.background = '#ffffff';
+          docBox.style.padding = '10px';
+          docBox.innerHTML = htmlMarkup;
+          overlay.appendChild(docBox);
+
+          document.body.appendChild(overlay);
+
+          // Force reflow
+          void docBox.offsetHeight;
 
           const opt = {
             margin: [8, 8, 10, 8],
             filename: filename,
             image: { type: 'jpeg', quality: 0.98 },
-            html2canvas: { scale: 2, useCORS: true, scrollY: 0 },
+            html2canvas: {
+              scale: 2,
+              useCORS: true,
+              logging: false,
+              scrollX: 0,
+              scrollY: 0
+            },
             jsPDF: { unit: 'mm', format: 'a4', orientation: orientation },
             pagebreak: { mode: ['css', 'legacy'] }
           };
 
-          await window.html2pdf().set(opt).from(wrapper).save();
+          await window.html2pdf().set(opt).from(docBox).save();
           return true;
         } catch (err) {
           console.warn('html2pdf rendering fallback triggered:', err);
         } finally {
-          if (wrapper && wrapper.parentNode) {
-            wrapper.parentNode.removeChild(wrapper);
+          if (overlay && overlay.parentNode) {
+            overlay.parentNode.removeChild(overlay);
           }
         }
       }
@@ -9214,7 +9336,7 @@ window.generateFilesPDF = async function() {
             </div>
           </div>
           <div style="font-size: 11.5px; font-weight: 700; color: #0f766e; margin-bottom: 10px; padding-bottom: 6px; border-bottom: 1.5px solid #cbd5e1;">
-            ${escapeHtml(subtitleText)}
+            ${typeof subtitleText === 'string' && subtitleText.includes('<') ? subtitleText : escapeHtml(subtitleText)}
           </div>
           ${bodyHtml}
         </div>
@@ -9488,7 +9610,7 @@ window.generateFilesPDF = async function() {
             date: formatDateDMY(dateStr),
             lf: '',
             docNo: '',
-            particularsHtml: '<span style="color: #dc2626; font-weight: 700;">മുന്നിരിപ്പ് (To Balance B/F)</span>',
+            particularsHtml: '<span style="color: #dc2626; font-weight: 800;">മുന്നിരിപ്പ് (To Balance B/F)</span>',
             cash: formatAmt2(dayOpHand),
             bank: formatAmt2(dayOpBank),
             isOpening: true,
@@ -9507,7 +9629,7 @@ window.generateFilesPDF = async function() {
           date: formatDateDMY(dateStr),
           lf: '',
           docNo: '',
-          particularsHtml: '<span style="color: #dc2626; font-weight: 700;">നീക്കിയിരിപ്പ് (By Balance C/F)</span>',
+          particularsHtml: '<span style="color: #dc2626; font-weight: 800;">നീക്കിയിരിപ്പ് (By Balance C/F)</span>',
           cash: formatAmt2(dayCloseHand),
           bank: formatAmt2(dayCloseBank),
           isOpening: false,
@@ -9518,24 +9640,26 @@ window.generateFilesPDF = async function() {
           const r = leftList[i] || null;
           const p = rightList[i] || null;
 
-          const rAmtStyle = r && r.isOpening
-            ? 'font-weight: 700; color: #dc2626;'
-            : 'font-weight: 600; color: #0f172a;';
+          // Opening Balance text color in bold red (#dc2626)
+          const rDateStyle = r && r.isOpening ? 'font-weight: 700; color: #dc2626;' : 'font-weight: 500; color: #0f172a;';
+          const rAmtStyle = r && r.isOpening ? 'font-weight: 800; color: #dc2626;' : 'font-weight: 600; color: #0f172a;';
 
-          const pAmtStyle = p && p.isClosing
-            ? 'font-weight: 700; color: #dc2626;'
-            : 'font-weight: 600; color: #0f172a;';
+          // Closing Balance text color in bold red (#dc2626)
+          const pDateStyle = p && p.isClosing ? 'font-weight: 700; color: #dc2626;' : 'font-weight: 500; color: #0f172a;';
+          const pAmtStyle = p && p.isClosing ? 'font-weight: 800; color: #dc2626;' : 'font-weight: 600; color: #0f172a;';
+
+          const rowBg = (r && r.isOpening) || (p && p.isClosing) ? '#fffbfb' : '#ffffff';
 
           pairedBodyHtml += `
-            <tr style="page-break-inside: avoid; background: #ffffff;">
-              <td style="padding: 5.5px 5px; border: ${cellBorder}; font-size: 9.5px; white-space: nowrap; text-align: center; vertical-align: top;">${r ? escapeHtml(r.date) : ''}</td>
+            <tr style="page-break-inside: avoid; background: ${rowBg};">
+              <td style="padding: 5.5px 5px; border: ${cellBorder}; font-size: 9.5px; white-space: nowrap; text-align: center; vertical-align: top; ${rDateStyle}">${r ? escapeHtml(r.date) : ''}</td>
               <td style="padding: 5.5px 4px; border: ${cellBorder}; font-size: 9.5px; text-align: center; vertical-align: top;">${r ? escapeHtml(r.lf) : ''}</td>
               <td style="padding: 5.5px 5px; border: ${cellBorder}; font-size: 9.5px; text-align: center; vertical-align: top; word-break: break-word;">${r ? r.docNo : ''}</td>
               <td style="padding: 5.5px 6px; border: ${cellBorder}; font-size: 9.5px; text-align: left; vertical-align: top; word-break: break-word;">${r ? r.particularsHtml : ''}</td>
               <td style="padding: 5.5px 6px; border: ${cellBorder}; font-size: 9.5px; text-align: right; white-space: nowrap; vertical-align: top; ${rAmtStyle}">${r ? escapeHtml(r.cash) : ''}</td>
               <td style="padding: 5.5px 6px; border: ${cellBorder}; border-right: ${centerDivider}; font-size: 9.5px; text-align: right; white-space: nowrap; vertical-align: top; ${rAmtStyle}">${r ? escapeHtml(r.bank) : ''}</td>
 
-              <td style="padding: 5.5px 5px; border: ${cellBorder}; font-size: 9.5px; white-space: nowrap; text-align: center; vertical-align: top;">${p ? escapeHtml(p.date) : ''}</td>
+              <td style="padding: 5.5px 5px; border: ${cellBorder}; font-size: 9.5px; white-space: nowrap; text-align: center; vertical-align: top; ${pDateStyle}">${p ? escapeHtml(p.date) : ''}</td>
               <td style="padding: 5.5px 4px; border: ${cellBorder}; font-size: 9.5px; text-align: center; vertical-align: top;">${p ? escapeHtml(p.lf) : ''}</td>
               <td style="padding: 5.5px 5px; border: ${cellBorder}; font-size: 9.5px; text-align: center; vertical-align: top; word-break: break-word;">${p ? p.docNo : ''}</td>
               <td style="padding: 5.5px 6px; border: ${cellBorder}; font-size: 9.5px; text-align: left; vertical-align: top; word-break: break-word;">${p ? p.particularsHtml : ''}</td>
@@ -9588,7 +9712,12 @@ window.generateFilesPDF = async function() {
 
       const doubleColumnCashBookHtml = `
         <div style="background: #e2f0d9; border: 1.5px solid #0f766e; color: #0f172a; text-align: center; font-weight: 800; font-size: 11.5px; padding: 6px 12px; margin-bottom: 8px; border-radius: 4px; font-family: 'Noto Sans Malayalam', 'Nirmala UI', sans-serif;">
-          ${escapeHtml(periodBannerTitle)}
+          <div>${escapeHtml(periodBannerTitle)}</div>
+          <div style="font-size: 10px; font-weight: 700; margin-top: 3px; color: #334155;">
+            <span style="color: #dc2626;">തുടക്ക മുന്നിരിപ്പ് (Opening B/F): ₹${formatNumber(periodOpHand + periodOpBank)}</span>
+            &nbsp;&nbsp;•&nbsp;&nbsp;
+            <span style="color: #dc2626;">അവസാന നീക്കിയിരിപ്പ് (Closing C/F): ₹${formatNumber(closingCombined)}</span>
+          </div>
         </div>
         <table style="width: 100%; border-collapse: collapse; table-layout: fixed; border: 2px solid #0f172a; margin-bottom: 14px; font-family: 'Noto Sans Malayalam', 'Nirmala UI', sans-serif;">
           <colgroup>
@@ -9642,7 +9771,7 @@ window.generateFilesPDF = async function() {
       const fullHtml = buildReportDocumentHtml(
         'ക്യാഷ് ബുക്ക് & ദിവസേന ഓഡിറ്റ്',
         'Official Cash Book & Daily Audit',
-        `മുന്നിരിപ്പ്: ₹${formatNumber(periodOpHand + periodOpBank)} | നീക്കിയിരിപ്പ്: ₹${formatNumber(closingCombined)} (കൈവശം: ₹${formatNumber(closingHand)} | ബാങ്ക്: ₹${formatNumber(closingBank)})`,
+        `<span style="color: #dc2626; font-weight: 800;">മുന്നിരിപ്പ് (Opening Balance): ₹${formatNumber(periodOpHand + periodOpBank)}</span> &nbsp;|&nbsp; <span style="color: #dc2626; font-weight: 800;">നീക്കിയിരിപ്പ് (Closing Balance): ₹${formatNumber(closingCombined)} (കൈവശം: ₹${formatNumber(closingHand)} | ബാങ്ക്: ₹${formatNumber(closingBank)})</span>`,
         doubleColumnCashBookHtml
       );
 
