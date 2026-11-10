@@ -125,12 +125,86 @@
     }
     .table-scroll-wrap {
       width: 100%;
-      overflow-x: auto;
+      max-height: 72vh;
+      overflow: auto;
       -webkit-overflow-scrolling: touch;
+      position: relative;
+      background: #ffffff;
+    }
+    .responsive-table,
+    .table-scroll-wrap table {
+      border-collapse: separate;
+      border-spacing: 0;
+    }
+    .responsive-table thead,
+    .table-scroll-wrap table thead {
+      position: sticky;
+      top: 0;
+      z-index: 25;
+    }
+    .responsive-table thead th,
+    .table-scroll-wrap table thead th {
+      position: sticky;
+      top: 0;
+      z-index: 25;
+      background-color: #f8fafc !important;
+      box-shadow: inset 0 -1.5px 0 #cbd5e1;
+      vertical-align: middle;
+    }
+    .responsive-table tfoot,
+    .table-scroll-wrap table tfoot {
+      position: sticky;
+      bottom: 0;
+      z-index: 20;
+    }
+    .responsive-table tfoot td,
+    .table-scroll-wrap table tfoot td {
+      position: sticky;
+      bottom: 0;
+      z-index: 20;
+      background-color: #f8fafc;
+      box-shadow: inset 0 1.5px 0 #cbd5e1;
+      vertical-align: middle;
     }
     .responsive-table th,
     .responsive-table td {
       vertical-align: middle;
+    }
+    .app-page-head,
+    .cashbook-page-head {
+      position: sticky;
+      top: 0;
+      z-index: 30;
+      background-color: #f1f5f9;
+    }
+    @media screen and (min-width: 1024px) {
+      #tab-cashbook:not(.hidden),
+      #tab-libraries:not(.hidden),
+      #tab-ledger:not(.hidden),
+      #tab-files:not(.hidden),
+      #tab-registers:not(.hidden) {
+        display: flex !important;
+        flex-direction: column;
+        height: calc(100vh - 7.5rem);
+      }
+      #tab-cashbook .table-scroll-wrap {
+        max-height: calc(100vh - 21.5rem);
+      }
+      #tab-libraries .table-scroll-wrap {
+        max-height: calc(100vh - 14.5rem);
+      }
+      #tab-ledger .table-scroll-wrap {
+        max-height: calc(100vh - 22rem);
+      }
+      #tab-files .table-scroll-wrap {
+        max-height: calc(100vh - 15rem);
+      }
+      #tab-registers .table-scroll-wrap {
+        max-height: calc(100vh - 23rem);
+      }
+      #tab-documents:not(.hidden) #doc-active-card-workspace .table-scroll-wrap {
+        max-height: calc(100vh - 22rem);
+      }
     }
     .custom-scrollbar::-webkit-scrollbar {
       width: 6px;
@@ -311,33 +385,60 @@
       .tab-content.hidden {
         display: none !important;
       }
+      .table-scroll-wrap {
+        max-height: none !important;
+        overflow: visible !important;
+      }
       table, .responsive-table {
         display: table !important;
         width: 100% !important;
         border-collapse: collapse !important;
+        page-break-inside: auto !important;
       }
-      .responsive-table thead {
+      .responsive-table thead, table thead {
         display: table-header-group !important;
       }
-      .responsive-table tbody {
+      .responsive-table tbody, table tbody {
         display: table-row-group !important;
         padding: 0 !important;
       }
-      .responsive-table tfoot {
+      .responsive-table tfoot, table tfoot {
         display: table-footer-group !important;
         padding: 0 !important;
       }
-      .responsive-table tr {
+      .responsive-table tr, table tr {
         display: table-row !important;
+        page-break-inside: avoid !important;
+        break-inside: avoid !important;
       }
       th, td, .responsive-table td, .responsive-table td.mobile-hide-dash {
         display: table-cell !important;
         border: 1px solid #cbd5e1 !important;
         padding: 6px 8px !important;
+        page-break-inside: avoid !important;
+        break-inside: avoid !important;
       }
       .responsive-table td::before {
         display: none !important;
         content: none !important;
+      }
+      .page-break,
+      .html2pdf__page-break {
+        page-break-before: always !important;
+        break-before: page !important;
+        display: block !important;
+        height: 0 !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        border: none !important;
+      }
+      .page-break-after {
+        page-break-after: always !important;
+        break-after: page !important;
+      }
+      .avoid-break {
+        page-break-inside: avoid !important;
+        break-inside: avoid !important;
       }
       .print-header {
         display: block !important;
@@ -709,49 +810,52 @@
              2. LIBRARY MANAGEMENT TAB
         =============================================== -->
         <section id="tab-libraries" class="tab-content hidden space-y-4 sm:space-y-5">
-          <!-- Toolbar -->
-          <div class="bg-white p-3.5 sm:p-4 rounded-2xl border border-slate-200 flex flex-col lg:flex-row lg:items-center justify-between gap-3 shadow-sm no-print">
-            <div class="flex flex-col sm:flex-row flex-1 items-stretch sm:items-center gap-2.5 min-w-0">
-              <div class="relative flex-1 min-w-0 lg:max-w-md">
-                <i data-lucide="search" class="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none"></i>
-                <input type="text" id="lib-search" oninput="renderLibraries()" placeholder="പേര്, കോഡ്, സ്ഥലം പ്രകാരം തിരയുക..." class="ui-control w-full pl-10 pr-4 border border-slate-200 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent" />
+          <!-- Page Head (Sticky / Fixed No Scroll) -->
+          <div class="app-page-head sticky top-0 z-30 bg-slate-100 pb-2.5 -mt-1 pt-1">
+            <!-- Toolbar -->
+            <div class="bg-white p-3.5 sm:p-4 rounded-2xl border border-slate-200 flex flex-col lg:flex-row lg:items-center justify-between gap-3 shadow-sm no-print">
+              <div class="flex flex-col sm:flex-row flex-1 items-stretch sm:items-center gap-2.5 min-w-0">
+                <div class="relative flex-1 min-w-0 lg:max-w-md">
+                  <i data-lucide="search" class="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none"></i>
+                  <input type="text" id="lib-search" oninput="renderLibraries()" placeholder="പേര്, കോഡ്, സ്ഥലം പ്രകാരം തിരയുക..." class="ui-control w-full pl-10 pr-4 border border-slate-200 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent" />
+                </div>
+                <select id="lib-filter-grade" onchange="renderLibraries()" class="ui-control w-full sm:w-52 border border-slate-200 text-sm px-3 bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500">
+                  <option value="">എല്ലാ ഗ്രേഡുകളും (All Grades)</option>
+                  <option value="A">Grade A</option>
+                  <option value="B">Grade B</option>
+                  <option value="C">Grade C</option>
+                  <option value="D">Grade D</option>
+                </select>
               </div>
-              <select id="lib-filter-grade" onchange="renderLibraries()" class="ui-control w-full sm:w-52 border border-slate-200 text-sm px-3 bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500">
-                <option value="">എല്ലാ ഗ്രേഡുകളും (All Grades)</option>
-                <option value="A">Grade A</option>
-                <option value="B">Grade B</option>
-                <option value="C">Grade C</option>
-                <option value="D">Grade D</option>
-              </select>
-            </div>
-            <div class="grid grid-cols-2 sm:flex flex-wrap items-center gap-2 lg:flex-shrink-0">
-              <button onclick="generateLibraryListPDF()" class="ui-btn px-3.5 bg-blue-50 text-blue-700 border border-blue-200 hover:bg-blue-100 text-xs sm:text-sm font-semibold shadow-sm transition w-full sm:w-auto">
-                <i data-lucide="file-down" class="w-4 h-4 flex-shrink-0"></i>
-                <span>ഡയറക്ടറി PDF</span>
-              </button>
-              <button onclick="triggerLibraryExcelUpload()" class="ui-btn px-3.5 bg-emerald-50 text-emerald-800 border border-emerald-200 hover:bg-emerald-100 text-xs sm:text-sm font-semibold shadow-sm transition w-full sm:w-auto" title="Excel ഫയലിൽ നിന്ന് വിവരങ്ങൾ ചേർക്കുക">
-                <i data-lucide="file-spreadsheet" class="w-4 h-4 flex-shrink-0"></i>
-                <span>Excel ഇമ്പോർട്ട്</span>
-              </button>
-              <button onclick="downloadLibraryExcelTemplate()" class="ui-btn px-3 bg-slate-50 text-slate-700 border border-slate-200 hover:bg-slate-100 text-xs sm:text-sm font-medium shadow-sm transition w-full sm:w-auto" title="മാതൃകാ Excel ഫയൽ ഡൗൺലോഡ് ചെയ്യുക">
-                <i data-lucide="download" class="w-4 h-4 flex-shrink-0"></i>
-                <span>ടെംപ്ലേറ്റ്</span>
-              </button>
-              <button onclick="openLibraryModal()" class="ui-btn px-4 bg-emerald-600 hover:bg-emerald-700 text-white text-xs sm:text-sm font-semibold shadow transition w-full sm:w-auto">
-                <i data-lucide="plus" class="w-4 h-4 flex-shrink-0"></i>
-                <span>പുതിയ ലൈബ്രറി</span>
-              </button>
-              <button onclick="deleteAllLibraries()" class="ui-btn px-3 bg-rose-50 text-rose-700 border border-rose-200 hover:bg-rose-100 text-xs sm:text-sm font-semibold shadow-sm transition w-full sm:w-auto" title="എല്ലാ ലൈബ്രറികളും നീക്കം ചെയ്യുക">
-                <i data-lucide="trash-2" class="w-4 h-4 flex-shrink-0"></i>
-                <span>എല്ലാം ഒഴിവാക്കുക</span>
-              </button>
-              <input type="file" id="lib-excel-input" accept=".xlsx, .xls, .csv" class="hidden" onchange="handleLibraryExcelUpload(event)" />
+              <div class="grid grid-cols-2 sm:flex flex-wrap items-center gap-2 lg:flex-shrink-0">
+                <button onclick="generateLibraryListPDF()" class="ui-btn px-3.5 bg-blue-50 text-blue-700 border border-blue-200 hover:bg-blue-100 text-xs sm:text-sm font-semibold shadow-sm transition w-full sm:w-auto">
+                  <i data-lucide="file-down" class="w-4 h-4 flex-shrink-0"></i>
+                  <span>ഡയറക്ടറി PDF</span>
+                </button>
+                <button onclick="triggerLibraryExcelUpload()" class="ui-btn px-3.5 bg-emerald-50 text-emerald-800 border border-emerald-200 hover:bg-emerald-100 text-xs sm:text-sm font-semibold shadow-sm transition w-full sm:w-auto" title="Excel ഫയലിൽ നിന്ന് വിവരങ്ങൾ ചേർക്കുക">
+                  <i data-lucide="file-spreadsheet" class="w-4 h-4 flex-shrink-0"></i>
+                  <span>Excel ഇമ്പോർട്ട്</span>
+                </button>
+                <button onclick="downloadLibraryExcelTemplate()" class="ui-btn px-3 bg-slate-50 text-slate-700 border border-slate-200 hover:bg-slate-100 text-xs sm:text-sm font-medium shadow-sm transition w-full sm:w-auto" title="മാതൃകാ Excel ഫയൽ ഡൗൺലോഡ് ചെയ്യുക">
+                  <i data-lucide="download" class="w-4 h-4 flex-shrink-0"></i>
+                  <span>ടെംപ്ലേറ്റ്</span>
+                </button>
+                <button onclick="openLibraryModal()" class="ui-btn px-4 bg-emerald-600 hover:bg-emerald-700 text-white text-xs sm:text-sm font-semibold shadow transition w-full sm:w-auto">
+                  <i data-lucide="plus" class="w-4 h-4 flex-shrink-0"></i>
+                  <span>പുതിയ ലൈബ്രറി</span>
+                </button>
+                <button onclick="deleteAllLibraries()" class="ui-btn px-3 bg-rose-50 text-rose-700 border border-rose-200 hover:bg-rose-100 text-xs sm:text-sm font-semibold shadow-sm transition w-full sm:w-auto" title="എല്ലാ ലൈബ്രറികളും നീക്കം ചെയ്യുക">
+                  <i data-lucide="trash-2" class="w-4 h-4 flex-shrink-0"></i>
+                  <span>എല്ലാം ഒഴിവാക്കുക</span>
+                </button>
+                <input type="file" id="lib-excel-input" accept=".xlsx, .xls, .csv" class="hidden" onchange="handleLibraryExcelUpload(event)" />
+              </div>
             </div>
           </div>
 
           <!-- Libraries Table -->
-          <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
-            <div class="table-scroll-wrap custom-scrollbar">
+          <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden flex-1 min-h-0 flex flex-col">
+            <div class="table-scroll-wrap custom-scrollbar flex-1 min-h-0">
               <table class="w-full text-sm text-left text-slate-600 responsive-table">
                 <thead class="bg-slate-50 text-slate-600 uppercase text-xs font-semibold border-b border-slate-200">
                   <tr>
@@ -783,25 +887,28 @@
              3. SCHEME MANAGEMENT TAB
         =============================================== -->
         <section id="tab-schemes" class="tab-content hidden space-y-4 sm:space-y-5">
-          <!-- Toolbar -->
-          <div class="bg-white p-3.5 sm:p-4 rounded-2xl border border-slate-200 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-sm no-print">
-            <div class="min-w-0">
-              <h3 class="font-bold text-sm sm:text-base text-slate-800">പദ്ധതികളും ഫണ്ട് വിനിയോഗവും (Schemes & Grants)</h3>
-              <p class="text-xs text-slate-500">ഗ്രാൻഡ്, പുസ്തക വിതരണം, അടിസ്ഥാന സൗകര്യ വികസനം</p>
-            </div>
-            <div class="grid grid-cols-2 sm:flex flex-wrap items-center gap-2 sm:flex-shrink-0">
-              <button onclick="generateSchemesPDF()" class="ui-btn px-3.5 bg-purple-50 text-purple-700 border border-purple-200 hover:bg-purple-100 text-xs sm:text-sm font-semibold shadow-sm transition w-full sm:w-auto">
-                <i data-lucide="file-down" class="w-4 h-4 flex-shrink-0"></i>
-                <span>പദ്ധതി PDF</span>
-              </button>
-              <button onclick="openSchemeModal()" class="ui-btn px-4 bg-emerald-600 hover:bg-emerald-700 text-white text-xs sm:text-sm font-semibold shadow transition w-full sm:w-auto">
-                <i data-lucide="plus-circle" class="w-4 h-4 flex-shrink-0"></i>
-                <span>പുതിയ പദ്ധതി</span>
-              </button>
-              <button onclick="deleteAllSchemes()" class="ui-btn px-3 bg-rose-50 text-rose-700 border border-rose-200 hover:bg-rose-100 text-xs sm:text-sm font-semibold shadow-sm transition w-full sm:w-auto" title="എല്ലാ പദ്ധതികളും നീക്കം ചെയ്യുക">
-                <i data-lucide="trash-2" class="w-4 h-4 flex-shrink-0"></i>
-                <span>എല്ലാം ഒഴിവാക്കുക</span>
-              </button>
+          <!-- Page Head (Sticky / Fixed No Scroll) -->
+          <div class="app-page-head sticky top-0 z-30 bg-slate-100 pb-2.5 -mt-1 pt-1">
+            <!-- Toolbar -->
+            <div class="bg-white p-3.5 sm:p-4 rounded-2xl border border-slate-200 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-sm no-print">
+              <div class="min-w-0">
+                <h3 class="font-bold text-sm sm:text-base text-slate-800">പദ്ധതികളും ഫണ്ട് വിനിയോഗവും (Schemes & Grants)</h3>
+                <p class="text-xs text-slate-500">ഗ്രാൻഡ്, പുസ്തക വിതരണം, അടിസ്ഥാന സൗകര്യ വികസനം</p>
+              </div>
+              <div class="grid grid-cols-2 sm:flex flex-wrap items-center gap-2 sm:flex-shrink-0">
+                <button onclick="generateSchemesPDF()" class="ui-btn px-3.5 bg-purple-50 text-purple-700 border border-purple-200 hover:bg-purple-100 text-xs sm:text-sm font-semibold shadow-sm transition w-full sm:w-auto">
+                  <i data-lucide="file-down" class="w-4 h-4 flex-shrink-0"></i>
+                  <span>പദ്ധതി PDF</span>
+                </button>
+                <button onclick="openSchemeModal()" class="ui-btn px-4 bg-emerald-600 hover:bg-emerald-700 text-white text-xs sm:text-sm font-semibold shadow transition w-full sm:w-auto">
+                  <i data-lucide="plus-circle" class="w-4 h-4 flex-shrink-0"></i>
+                  <span>പുതിയ പദ്ധതി</span>
+                </button>
+                <button onclick="deleteAllSchemes()" class="ui-btn px-3 bg-rose-50 text-rose-700 border border-rose-200 hover:bg-rose-100 text-xs sm:text-sm font-semibold shadow-sm transition w-full sm:w-auto" title="എല്ലാ പദ്ധതികളും നീക്കം ചെയ്യുക">
+                  <i data-lucide="trash-2" class="w-4 h-4 flex-shrink-0"></i>
+                  <span>എല്ലാം ഒഴിവാക്കുക</span>
+                </button>
+              </div>
             </div>
           </div>
 
@@ -1042,96 +1149,99 @@
         <!-- ==============================================
              4. CASH BOOK TAB
         =============================================== -->
-        <section id="tab-cashbook" class="tab-content hidden space-y-4 sm:space-y-5">
-          <!-- Opening & Closing Balance Overview Cards -->
-          <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-3 sm:gap-4">
-            <!-- Opening Balance Card -->
-            <div class="bg-white border border-slate-200 p-4 rounded-2xl shadow-sm flex items-start justify-between gap-2 min-w-0">
-              <div class="min-w-0 flex-1">
-                <p class="text-[11px] font-semibold text-slate-500 uppercase truncate">മുന്നിരിപ്പ് (Opening Balance)</p>
-                <h3 id="cb-total-opening" class="text-lg sm:text-xl font-black text-slate-800 tabular-nums mt-0.5 break-words">₹0</h3>
-                <div class="flex flex-wrap items-center gap-x-2 gap-y-0.5 mt-1 text-[11px] tabular-nums">
-                  <span class="text-amber-700 font-medium">കൈവശം: <span id="cb-op-hand" class="font-bold">₹0</span></span>
-                  <span class="text-slate-300 hidden xs:inline">|</span>
-                  <span class="text-cyan-700 font-medium">ബാങ്ക്: <span id="cb-op-bank" class="font-bold">₹0</span></span>
+        <section id="tab-cashbook" class="tab-content hidden space-y-3 sm:space-y-4">
+          <!-- Fixed / Non-scrolling Cash Book Page Head (Overview Cards + Filters & Actions) -->
+          <div class="cashbook-page-head sticky top-0 z-30 bg-slate-100 pb-3 -mt-1 pt-1 space-y-3 sm:space-y-4 shadow-2xs">
+            <!-- Opening & Closing Balance Overview Cards -->
+            <div class="grid grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-4">
+              <!-- Opening Balance Card -->
+              <div class="bg-white border border-slate-200 p-3.5 sm:p-4 rounded-2xl shadow-sm flex items-start justify-between gap-2 min-w-0">
+                <div class="min-w-0 flex-1">
+                  <p class="text-[11px] font-semibold text-slate-500 uppercase truncate">മുന്നിരിപ്പ് (Opening Balance)</p>
+                  <h3 id="cb-total-opening" class="text-base sm:text-xl font-black text-slate-800 tabular-nums mt-0.5 break-words">₹0</h3>
+                  <div class="flex flex-wrap items-center gap-x-2 gap-y-0.5 mt-1 text-[10.5px] sm:text-[11px] tabular-nums">
+                    <span class="text-amber-700 font-medium">കൈവശം: <span id="cb-op-hand" class="font-bold">₹0</span></span>
+                    <span class="text-slate-300 hidden xs:inline">|</span>
+                    <span class="text-cyan-700 font-medium">ബാങ്ക്: <span id="cb-op-bank" class="font-bold">₹0</span></span>
+                  </div>
+                </div>
+                <button onclick="openOpeningBalanceModal()" class="w-8 h-8 sm:w-9 sm:h-9 inline-flex items-center justify-center text-slate-400 hover:text-emerald-600 hover:bg-emerald-50 rounded-xl transition flex-shrink-0" title="മുന്നിരിപ്പ് തിരുത്തുക">
+                  <i data-lucide="settings-2" class="w-4 h-4 sm:w-5 sm:h-5"></i>
+                </button>
+              </div>
+
+              <!-- Total Income in Period -->
+              <div class="bg-emerald-50 border border-emerald-200 p-3.5 sm:p-4 rounded-2xl shadow-sm min-w-0">
+                <p class="text-[11px] font-semibold text-emerald-800 uppercase truncate">ആകെ വരവ് (Period Income)</p>
+                <h3 id="cb-total-income" class="text-base sm:text-xl font-black text-emerald-700 tabular-nums mt-0.5 break-words">₹0</h3>
+                <p class="text-[10.5px] sm:text-[11px] text-emerald-600 font-medium mt-1 truncate">തിരഞ്ഞെടുത്ത കാലയളവ്</p>
+              </div>
+
+              <!-- Total Expense in Period -->
+              <div class="bg-rose-50 border border-rose-200 p-3.5 sm:p-4 rounded-2xl shadow-sm min-w-0">
+                <p class="text-[11px] font-semibold text-rose-800 uppercase truncate">ആകെ ചെലവ് (Period Expense)</p>
+                <h3 id="cb-total-expense" class="text-base sm:text-xl font-black text-rose-700 tabular-nums mt-0.5 break-words">₹0</h3>
+                <p class="text-[10.5px] sm:text-[11px] text-rose-600 font-medium mt-1 truncate">തിരഞ്ഞെടുത്ത കാലയളവ്</p>
+              </div>
+
+              <!-- Closing Balance Card -->
+              <div class="bg-teal-50 border border-teal-200 p-3.5 sm:p-4 rounded-2xl shadow-sm min-w-0">
+                <p class="text-[11px] font-semibold text-teal-800 uppercase truncate">നീക്കിയിരിപ്പ് (Closing Balance)</p>
+                <h3 id="cb-net-balance" class="text-base sm:text-xl font-black text-teal-800 tabular-nums mt-0.5 break-words">₹0</h3>
+                <div class="flex flex-wrap items-center gap-x-2 gap-y-0.5 mt-1 text-[10.5px] sm:text-[11px] tabular-nums">
+                  <span class="text-amber-800 font-medium">കൈവശം: <span id="cb-hand-balance" class="font-bold">₹0</span></span>
+                  <span class="text-teal-300 hidden xs:inline">|</span>
+                  <span class="text-cyan-800 font-medium">ബാങ്ക്: <span id="cb-bank-balance" class="font-bold">₹0</span></span>
                 </div>
               </div>
-              <button onclick="openOpeningBalanceModal()" class="w-9 h-9 inline-flex items-center justify-center text-slate-400 hover:text-emerald-600 hover:bg-emerald-50 rounded-xl transition flex-shrink-0" title="മുന്നിരിപ്പ് തിരുത്തുക">
-                <i data-lucide="settings-2" class="w-5 h-5"></i>
-              </button>
             </div>
 
-            <!-- Total Income in Period -->
-            <div class="bg-emerald-50 border border-emerald-200 p-4 rounded-2xl shadow-sm min-w-0">
-              <p class="text-[11px] font-semibold text-emerald-800 uppercase truncate">ആകെ വരവ് (Period Income)</p>
-              <h3 id="cb-total-income" class="text-lg sm:text-xl font-black text-emerald-700 tabular-nums mt-0.5 break-words">₹0</h3>
-              <p class="text-[11px] text-emerald-600 font-medium mt-1 truncate">തിരഞ്ഞെടുത്ത കാലയളവ്</p>
-            </div>
+            <!-- Action bar -->
+            <div class="bg-white p-3.5 sm:p-4 rounded-2xl border border-slate-200 flex flex-col 2xl:flex-row 2xl:items-center justify-between gap-3 shadow-sm no-print">
+              <div class="grid grid-cols-1 xs:grid-cols-2 lg:grid-cols-4 2xl:flex 2xl:flex-wrap items-center gap-2.5 flex-1 min-w-0">
+                <input type="month" id="cb-filter-month" onchange="renderCashBook()" class="ui-control w-full 2xl:w-auto border border-slate-200 px-3 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500" />
+                
+                <select id="cb-filter-type" onchange="renderCashBook()" class="ui-control w-full 2xl:w-auto border border-slate-200 px-3 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500">
+                  <option value="">എല്ലാ ഇടപാടുകളും (All Types)</option>
+                  <option value="income">വരവ് മാത്രം (Income)</option>
+                  <option value="expense">ചെലവ് മാത്രം (Expense)</option>
+                </select>
 
-            <!-- Total Expense in Period -->
-            <div class="bg-rose-50 border border-rose-200 p-4 rounded-2xl shadow-sm min-w-0">
-              <p class="text-[11px] font-semibold text-rose-800 uppercase truncate">ആകെ ചെലവ് (Period Expense)</p>
-              <h3 id="cb-total-expense" class="text-lg sm:text-xl font-black text-rose-700 tabular-nums mt-0.5 break-words">₹0</h3>
-              <p class="text-[11px] text-rose-600 font-medium mt-1 truncate">തിരഞ്ഞെടുത്ത കാലയളവ്</p>
-            </div>
+                <select id="cb-filter-account" onchange="renderCashBook()" class="ui-control w-full 2xl:w-auto border border-slate-200 px-3 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500">
+                  <option value="">കൈവശം & ബാങ്ക് (All Accounts)</option>
+                  <option value="cash">കൈവശമുള്ള ക്യാഷ് (Cash in Hand)</option>
+                  <option value="bank">ബാങ്ക് അക്കൗണ്ട് (Bank)</option>
+                </select>
 
-            <!-- Closing Balance Card -->
-            <div class="bg-teal-50 border border-teal-200 p-4 rounded-2xl shadow-sm min-w-0">
-              <p class="text-[11px] font-semibold text-teal-800 uppercase truncate">നീക്കിയിരിപ്പ് (Closing Balance)</p>
-              <h3 id="cb-net-balance" class="text-lg sm:text-xl font-black text-teal-800 tabular-nums mt-0.5 break-words">₹0</h3>
-              <div class="flex flex-wrap items-center gap-x-2 gap-y-0.5 mt-1 text-[11px] tabular-nums">
-                <span class="text-amber-800 font-medium">കൈവശം: <span id="cb-hand-balance" class="font-bold">₹0</span></span>
-                <span class="text-teal-300 hidden xs:inline">|</span>
-                <span class="text-cyan-800 font-medium">ബാങ്ക്: <span id="cb-bank-balance" class="font-bold">₹0</span></span>
+                <button onclick="resetCashBookFilters()" class="ui-btn px-3 border border-slate-200 hover:bg-slate-50 text-xs font-semibold text-slate-600 hover:text-slate-900 transition w-full 2xl:w-auto">
+                  <i data-lucide="rotate-ccw" class="w-3.5 h-3.5 flex-shrink-0"></i>
+                  <span>റീസെറ്റ്</span>
+                </button>
               </div>
-            </div>
-          </div>
 
-          <!-- Action bar -->
-          <div class="bg-white p-3.5 sm:p-4 rounded-2xl border border-slate-200 flex flex-col 2xl:flex-row 2xl:items-center justify-between gap-3 shadow-sm no-print">
-            <div class="grid grid-cols-1 xs:grid-cols-2 lg:grid-cols-4 2xl:flex 2xl:flex-wrap items-center gap-2.5 flex-1 min-w-0">
-              <input type="month" id="cb-filter-month" onchange="renderCashBook()" class="ui-control w-full 2xl:w-auto border border-slate-200 px-3 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500" />
-              
-              <select id="cb-filter-type" onchange="renderCashBook()" class="ui-control w-full 2xl:w-auto border border-slate-200 px-3 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500">
-                <option value="">എല്ലാ ഇടപാടുകളും (All Types)</option>
-                <option value="income">വരവ് മാത്രം (Income)</option>
-                <option value="expense">ചെലവ് മാത്രം (Expense)</option>
-              </select>
-
-              <select id="cb-filter-account" onchange="renderCashBook()" class="ui-control w-full 2xl:w-auto border border-slate-200 px-3 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500">
-                <option value="">കൈവശം & ബാങ്ക് (All Accounts)</option>
-                <option value="cash">കൈവശമുള്ള ക്യാഷ് (Cash in Hand)</option>
-                <option value="bank">ബാങ്ക് അക്കൗണ്ട് (Bank)</option>
-              </select>
-
-              <button onclick="resetCashBookFilters()" class="ui-btn px-3 border border-slate-200 hover:bg-slate-50 text-xs font-semibold text-slate-600 hover:text-slate-900 transition w-full 2xl:w-auto">
-                <i data-lucide="rotate-ccw" class="w-3.5 h-3.5 flex-shrink-0"></i>
-                <span>റീസെറ്റ്</span>
-              </button>
-            </div>
-
-            <div class="grid grid-cols-2 sm:grid-cols-3 xl:flex flex-wrap items-center gap-2 2xl:flex-shrink-0">
-              <button onclick="openOpeningBalanceModal()" class="ui-btn px-3 bg-slate-100 text-slate-700 border border-slate-200 hover:bg-slate-200 text-xs font-semibold shadow-sm transition w-full 2xl:w-auto">
-                <i data-lucide="sliders" class="w-4 h-4 flex-shrink-0"></i> <span>മുന്നിരിപ്പ്</span>
-              </button>
-              <button onclick="generateCashBookPDF()" class="ui-btn px-3 bg-teal-50 text-teal-700 border border-teal-200 hover:bg-teal-100 text-xs font-semibold shadow-sm transition w-full 2xl:w-auto">
-                <i data-lucide="file-down" class="w-4 h-4 flex-shrink-0"></i> <span>ക്യാഷ് ബുക്ക് PDF</span>
-              </button>
-              <button onclick="openCashEntryModal('income')" class="ui-btn px-3.5 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold shadow transition w-full 2xl:w-auto">
-                <i data-lucide="plus" class="w-4 h-4 flex-shrink-0"></i> <span>വരവ് / രസീത്</span>
-              </button>
-              <button onclick="openCashEntryModal('expense')" class="ui-btn px-3.5 bg-rose-600 hover:bg-rose-700 text-white text-xs font-semibold shadow transition w-full 2xl:w-auto">
-                <i data-lucide="minus" class="w-4 h-4 flex-shrink-0"></i> <span>ചെലവ്</span>
-              </button>
-              <button onclick="deleteAllCashEntries()" class="ui-btn px-3 bg-rose-50 text-rose-700 border border-rose-200 hover:bg-rose-100 text-xs font-semibold shadow-sm transition w-full 2xl:w-auto" title="എല്ലാ ഇടപാടുകളും നീക്കം ചെയ്യുക">
-                <i data-lucide="trash-2" class="w-4 h-4 flex-shrink-0"></i> <span>എല്ലാം ഒഴിവാക്കുക</span>
-              </button>
+              <div class="grid grid-cols-2 sm:grid-cols-3 xl:flex flex-wrap items-center gap-2 2xl:flex-shrink-0">
+                <button onclick="openOpeningBalanceModal()" class="ui-btn px-3 bg-slate-100 text-slate-700 border border-slate-200 hover:bg-slate-200 text-xs font-semibold shadow-sm transition w-full 2xl:w-auto">
+                  <i data-lucide="sliders" class="w-4 h-4 flex-shrink-0"></i> <span>മുന്നിരിപ്പ്</span>
+                </button>
+                <button onclick="generateCashBookPDF()" class="ui-btn px-3 bg-teal-50 text-teal-700 border border-teal-200 hover:bg-teal-100 text-xs font-semibold shadow-sm transition w-full 2xl:w-auto">
+                  <i data-lucide="file-down" class="w-4 h-4 flex-shrink-0"></i> <span>ക്യാഷ് ബുക്ക് PDF</span>
+                </button>
+                <button onclick="openCashEntryModal('income')" class="ui-btn px-3.5 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold shadow transition w-full 2xl:w-auto">
+                  <i data-lucide="plus" class="w-4 h-4 flex-shrink-0"></i> <span>വരവ് / രസീത്</span>
+                </button>
+                <button onclick="openCashEntryModal('expense')" class="ui-btn px-3.5 bg-rose-600 hover:bg-rose-700 text-white text-xs font-semibold shadow transition w-full 2xl:w-auto">
+                  <i data-lucide="minus" class="w-4 h-4 flex-shrink-0"></i> <span>ചെലവ്</span>
+                </button>
+                <button onclick="deleteAllCashEntries()" class="ui-btn px-3 bg-rose-50 text-rose-700 border border-rose-200 hover:bg-rose-100 text-xs font-semibold shadow-sm transition w-full 2xl:w-auto" title="എല്ലാ ഇടപാടുകളും നീക്കം ചെയ്യുക">
+                  <i data-lucide="trash-2" class="w-4 h-4 flex-shrink-0"></i> <span>എല്ലാം ഒഴിവാക്കുക</span>
+                </button>
+              </div>
             </div>
           </div>
 
           <!-- Cash Book Table -->
-          <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
-            <div class="table-scroll-wrap custom-scrollbar">
+          <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden flex-1 flex flex-col min-h-0">
+            <div class="table-scroll-wrap custom-scrollbar flex-1">
               <table class="w-full text-sm text-left text-slate-600 responsive-table">
                 <thead class="bg-slate-50 text-slate-600 uppercase text-xs font-semibold border-b border-slate-200">
                   <tr>
@@ -1169,70 +1279,73 @@
              LEDGER BOOK TAB
         =============================================== -->
         <section id="tab-ledger" class="tab-content hidden space-y-4 sm:space-y-5">
-          <!-- Ledger Toolbar -->
-          <div class="bg-white p-3.5 sm:p-4 rounded-2xl border border-slate-200 flex flex-col xl:flex-row xl:items-end justify-between gap-3.5 shadow-sm no-print">
-            <div class="grid grid-cols-1 xs:grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-3 flex-1 min-w-0">
-              <div class="min-w-0">
-                <label class="block text-[11px] font-semibold text-slate-500 uppercase mb-1 truncate">അക്കൗണ്ട് ഹെഡ് തിരഞ്ഞെടുക്കുക</label>
-                <select id="ledger-head-select" onchange="renderLedger()" class="ui-control w-full border border-slate-200 px-3 text-sm bg-white font-medium focus:outline-none focus:ring-2 focus:ring-emerald-500">
-                  <option value="">എല്ലാ ഹെഡുകളും (All Account Heads)</option>
-                </select>
+          <!-- Page Head: Toolbar + Summary Cards (Sticky / Fixed No Scroll) -->
+          <div class="app-page-head sticky top-0 z-30 bg-slate-100 pb-2.5 -mt-1 pt-1 space-y-3 sm:space-y-4 shadow-2xs">
+            <!-- Ledger Toolbar -->
+            <div class="bg-white p-3.5 sm:p-4 rounded-2xl border border-slate-200 flex flex-col xl:flex-row xl:items-end justify-between gap-3.5 shadow-sm no-print">
+              <div class="grid grid-cols-1 xs:grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-3 flex-1 min-w-0">
+                <div class="min-w-0">
+                  <label class="block text-[11px] font-semibold text-slate-500 uppercase mb-1 truncate">അക്കൗണ്ട് ഹെഡ് തിരഞ്ഞെടുക്കുക</label>
+                  <select id="ledger-head-select" onchange="renderLedger()" class="ui-control w-full border border-slate-200 px-3 text-sm bg-white font-medium focus:outline-none focus:ring-2 focus:ring-emerald-500">
+                    <option value="">എല്ലാ ഹെഡുകളും (All Account Heads)</option>
+                  </select>
+                </div>
+
+                <div class="min-w-0">
+                  <label class="block text-[11px] font-semibold text-slate-500 uppercase mb-1 truncate">അക്കൗണ്ട് മോഡ്</label>
+                  <select id="ledger-account-select" onchange="renderLedger()" class="ui-control w-full border border-slate-200 px-3 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500">
+                    <option value="">എല്ലാം (Cash & Bank)</option>
+                    <option value="cash">കൈവശമുള്ള ക്യാഷ് (Cash in Hand)</option>
+                    <option value="bank">ബാങ്ക് അക്കൗണ്ട് (Bank)</option>
+                  </select>
+                </div>
+
+                <div class="min-w-0">
+                  <label class="block text-[11px] font-semibold text-slate-500 uppercase mb-1 truncate">From Date</label>
+                  <input type="date" id="ledger-date-from" onchange="renderLedger()" class="ui-control w-full border border-slate-200 px-3 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500" />
+                </div>
+
+                <div class="min-w-0">
+                  <label class="block text-[11px] font-semibold text-slate-500 uppercase mb-1 truncate">To Date</label>
+                  <input type="date" id="ledger-date-to" onchange="renderLedger()" class="ui-control w-full border border-slate-200 px-3 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500" />
+                </div>
               </div>
 
-              <div class="min-w-0">
-                <label class="block text-[11px] font-semibold text-slate-500 uppercase mb-1 truncate">അക്കൗണ്ട് മോഡ്</label>
-                <select id="ledger-account-select" onchange="renderLedger()" class="ui-control w-full border border-slate-200 px-3 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500">
-                  <option value="">എല്ലാം (Cash & Bank)</option>
-                  <option value="cash">കൈവശമുള്ള ക്യാഷ് (Cash in Hand)</option>
-                  <option value="bank">ബാങ്ക് അക്കൗണ്ട് (Bank)</option>
-                </select>
-              </div>
-
-              <div class="min-w-0">
-                <label class="block text-[11px] font-semibold text-slate-500 uppercase mb-1 truncate">From Date</label>
-                <input type="date" id="ledger-date-from" onchange="renderLedger()" class="ui-control w-full border border-slate-200 px-3 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500" />
-              </div>
-
-              <div class="min-w-0">
-                <label class="block text-[11px] font-semibold text-slate-500 uppercase mb-1 truncate">To Date</label>
-                <input type="date" id="ledger-date-to" onchange="renderLedger()" class="ui-control w-full border border-slate-200 px-3 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500" />
+              <div class="grid grid-cols-2 sm:flex items-center gap-2 xl:flex-shrink-0">
+                <button onclick="resetLedgerFilters()" class="ui-btn px-3.5 border border-slate-200 hover:bg-slate-50 text-xs font-semibold text-slate-600 hover:text-slate-900 transition w-full sm:w-auto">
+                  <i data-lucide="rotate-ccw" class="w-3.5 h-3.5 flex-shrink-0"></i>
+                  <span>റീസെറ്റ്</span>
+                </button>
+                <button onclick="generateLedgerPDF()" class="ui-btn px-3.5 bg-indigo-50 text-indigo-700 border border-indigo-200 hover:bg-indigo-100 text-xs sm:text-sm font-semibold shadow-sm transition w-full sm:w-auto">
+                  <i data-lucide="file-down" class="w-4 h-4 flex-shrink-0"></i> <span>ലെഡ്ജർ PDF</span>
+                </button>
               </div>
             </div>
 
-            <div class="grid grid-cols-2 sm:flex items-center gap-2 xl:flex-shrink-0">
-              <button onclick="resetLedgerFilters()" class="ui-btn px-3.5 border border-slate-200 hover:bg-slate-50 text-xs font-semibold text-slate-600 hover:text-slate-900 transition w-full sm:w-auto">
-                <i data-lucide="rotate-ccw" class="w-3.5 h-3.5 flex-shrink-0"></i>
-                <span>റീസെറ്റ്</span>
-              </button>
-              <button onclick="generateLedgerPDF()" class="ui-btn px-3.5 bg-indigo-50 text-indigo-700 border border-indigo-200 hover:bg-indigo-100 text-xs sm:text-sm font-semibold shadow-sm transition w-full sm:w-auto">
-                <i data-lucide="file-down" class="w-4 h-4 flex-shrink-0"></i> <span>ലെഡ്ജർ PDF</span>
-              </button>
-            </div>
-          </div>
-
-          <!-- Ledger Summary Cards -->
-          <div class="grid grid-cols-1 xs:grid-cols-2 xl:grid-cols-4 gap-3 sm:gap-4">
-            <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm min-w-0">
-              <span class="text-xs font-semibold text-slate-500 uppercase block truncate">മുന്നിരിപ്പ് (Opening)</span>
-              <h4 id="ledger-opening-balance" class="text-lg sm:text-xl font-bold text-slate-700 mt-1 tabular-nums break-words">₹0</h4>
-            </div>
-            <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm min-w-0">
-              <span class="text-xs font-semibold text-slate-500 uppercase block truncate">ആകെ ക്രെഡിറ്റ് (വരവ് / Credit)</span>
-              <h4 id="ledger-total-credit" class="text-lg sm:text-xl font-bold text-emerald-600 mt-1 tabular-nums break-words">₹0</h4>
-            </div>
-            <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm min-w-0">
-              <span class="text-xs font-semibold text-slate-500 uppercase block truncate">ആകെ ഡെബിറ്റ് (ചെലവ് / Debit)</span>
-              <h4 id="ledger-total-debit" class="text-lg sm:text-xl font-bold text-rose-600 mt-1 tabular-nums break-words">₹0</h4>
-            </div>
-            <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm min-w-0">
-              <span class="text-xs font-semibold text-slate-500 uppercase block truncate">നീക്കിയിരിപ്പ് (Closing)</span>
-              <h4 id="ledger-closing-balance" class="text-lg sm:text-xl font-bold text-teal-700 mt-1 tabular-nums break-words">₹0</h4>
+            <!-- Ledger Summary Cards -->
+            <div class="grid grid-cols-1 xs:grid-cols-2 xl:grid-cols-4 gap-3 sm:gap-4">
+              <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm min-w-0">
+                <span class="text-xs font-semibold text-slate-500 uppercase block truncate">മുന്നിരിപ്പ് (Opening)</span>
+                <h4 id="ledger-opening-balance" class="text-lg sm:text-xl font-bold text-slate-700 mt-1 tabular-nums break-words">₹0</h4>
+              </div>
+              <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm min-w-0">
+                <span class="text-xs font-semibold text-slate-500 uppercase block truncate">ആകെ ക്രെഡിറ്റ് (വരവ് / Credit)</span>
+                <h4 id="ledger-total-credit" class="text-lg sm:text-xl font-bold text-emerald-600 mt-1 tabular-nums break-words">₹0</h4>
+              </div>
+              <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm min-w-0">
+                <span class="text-xs font-semibold text-slate-500 uppercase block truncate">ആകെ ഡെബിറ്റ് (ചെലവ് / Debit)</span>
+                <h4 id="ledger-total-debit" class="text-lg sm:text-xl font-bold text-rose-600 mt-1 tabular-nums break-words">₹0</h4>
+              </div>
+              <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm min-w-0">
+                <span class="text-xs font-semibold text-slate-500 uppercase block truncate">നീക്കിയിരിപ്പ് (Closing)</span>
+                <h4 id="ledger-closing-balance" class="text-lg sm:text-xl font-bold text-teal-700 mt-1 tabular-nums break-words">₹0</h4>
+              </div>
             </div>
           </div>
 
           <!-- Ledger Statement Table -->
-          <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
-            <div class="table-scroll-wrap custom-scrollbar">
+          <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden flex-1 min-h-0 flex flex-col">
+            <div class="table-scroll-wrap custom-scrollbar flex-1 min-h-0">
               <table class="w-full text-sm text-left text-slate-600 responsive-table">
                 <thead class="bg-slate-50 text-slate-600 uppercase text-xs font-semibold border-b border-slate-200">
                   <tr>
@@ -1397,92 +1510,95 @@
           </div>
 
           <!-- Inside-The-Card Active Workspace Container -->
-          <div id="doc-active-card-workspace" class="bg-white rounded-2xl border-2 border-indigo-500 shadow-sm overflow-hidden transition-all">
-            <!-- Active Card Header Banner -->
-            <div id="doc-workspace-header" class="bg-indigo-50/50 p-4 sm:p-5 border-b border-indigo-100 flex flex-col md:flex-row md:items-center justify-between gap-3">
-              <div class="flex items-center gap-3 min-w-0">
-                <div id="doc-workspace-icon-wrap" class="w-11 h-11 rounded-xl bg-indigo-600 text-white flex items-center justify-center flex-shrink-0 shadow-xs">
-                  <i id="doc-workspace-icon" data-lucide="landmark" class="w-6 h-6"></i>
-                </div>
-                <div class="min-w-0">
-                  <div class="flex items-center gap-2">
-                    <span id="doc-workspace-badge" class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-indigo-100 text-indigo-800 border border-indigo-200">സംസ്ഥാനം</span>
-                    <span class="text-xs text-slate-400">• കാർഡ് തുറന്നിരിക്കുന്നു</span>
+          <div id="doc-active-card-workspace" class="bg-white rounded-2xl border-2 border-indigo-500 shadow-sm overflow-hidden transition-all flex flex-col">
+            <!-- Sticky Workspace Head inside Card -->
+            <div class="sticky top-0 z-20 bg-white border-b border-slate-100 shadow-2xs">
+              <!-- Active Card Header Banner -->
+              <div id="doc-workspace-header" class="bg-indigo-50/50 p-4 sm:p-5 border-b border-indigo-100 flex flex-col md:flex-row md:items-center justify-between gap-3">
+                <div class="flex items-center gap-3 min-w-0">
+                  <div id="doc-workspace-icon-wrap" class="w-11 h-11 rounded-xl bg-indigo-600 text-white flex items-center justify-center flex-shrink-0 shadow-xs">
+                    <i id="doc-workspace-icon" data-lucide="landmark" class="w-6 h-6"></i>
                   </div>
-                  <h3 id="doc-workspace-title" class="font-bold text-slate-800 text-base sm:text-lg truncate">കേരള സ്റ്റേറ്റ് ലൈബ്രറി കൗൺസിൽ</h3>
-                  <p id="doc-workspace-sub" class="text-xs text-slate-500 truncate">Kerala State Library Council — കത്തുകളും ഉത്തരവുകളും</p>
+                  <div class="min-w-0">
+                    <div class="flex items-center gap-2">
+                      <span id="doc-workspace-badge" class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-indigo-100 text-indigo-800 border border-indigo-200">സംസ്ഥാനം</span>
+                      <span class="text-xs text-slate-400">• കാർഡ് തുറന്നിരിക്കുന്നു</span>
+                    </div>
+                    <h3 id="doc-workspace-title" class="font-bold text-slate-800 text-base sm:text-lg truncate">കേരള സ്റ്റേറ്റ് ലൈബ്രറി കൗൺസിൽ</h3>
+                    <p id="doc-workspace-sub" class="text-xs text-slate-500 truncate">Kerala State Library Council — കത്തുകളും ഉത്തരവുകളും</p>
+                  </div>
+                </div>
+
+                <!-- Quick category switch inside card (എല്ലാം vs കത്തുകൾ vs ഉത്തരവുകൾ) -->
+                <div class="flex flex-wrap items-center gap-1.5 p-1 bg-white rounded-xl border border-slate-200 shadow-xs no-print self-start md:self-auto">
+                  <button type="button" id="doc-cat-btn-all" onclick="setDocumentCategoryFilter('all')" class="px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1.5 bg-indigo-600 text-white shadow-xs">
+                    <i data-lucide="layers" class="w-3.5 h-3.5"></i>
+                    <span>📋 എല്ലാം</span>
+                    <span id="doc-badge-all" class="px-1.5 py-0.2 rounded-full text-[10px] bg-white/20">0</span>
+                  </button>
+                  <button type="button" id="doc-cat-btn-letters" onclick="setDocumentCategoryFilter('letters')" class="px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1.5 text-slate-600 hover:text-slate-900 hover:bg-slate-100">
+                    <i data-lucide="mail" class="w-3.5 h-3.5 text-emerald-600"></i>
+                    <span>✉️ കത്തുകൾ</span>
+                    <span id="doc-badge-letters" class="px-1.5 py-0.2 rounded-full text-[10px] bg-slate-100 text-slate-600">0</span>
+                  </button>
+                  <button type="button" id="doc-cat-btn-orders" onclick="setDocumentCategoryFilter('orders')" class="px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1.5 text-slate-600 hover:text-slate-900 hover:bg-slate-100">
+                    <i data-lucide="scroll-text" class="w-3.5 h-3.5 text-amber-600"></i>
+                    <span>📜 ഉത്തരവുകൾ</span>
+                    <span id="doc-badge-orders" class="px-1.5 py-0.2 rounded-full text-[10px] bg-slate-100 text-slate-600">0</span>
+                  </button>
                 </div>
               </div>
 
-              <!-- Quick category switch inside card (എല്ലാം vs കത്തുകൾ vs ഉത്തരവുകൾ) -->
-              <div class="flex flex-wrap items-center gap-1.5 p-1 bg-white rounded-xl border border-slate-200 shadow-xs no-print self-start md:self-auto">
-                <button type="button" id="doc-cat-btn-all" onclick="setDocumentCategoryFilter('all')" class="px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1.5 bg-indigo-600 text-white shadow-xs">
-                  <i data-lucide="layers" class="w-3.5 h-3.5"></i>
-                  <span>📋 എല്ലാം</span>
-                  <span id="doc-badge-all" class="px-1.5 py-0.2 rounded-full text-[10px] bg-white/20">0</span>
-                </button>
-                <button type="button" id="doc-cat-btn-letters" onclick="setDocumentCategoryFilter('letters')" class="px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1.5 text-slate-600 hover:text-slate-900 hover:bg-slate-100">
-                  <i data-lucide="mail" class="w-3.5 h-3.5 text-emerald-600"></i>
-                  <span>✉️ കത്തുകൾ</span>
-                  <span id="doc-badge-letters" class="px-1.5 py-0.2 rounded-full text-[10px] bg-slate-100 text-slate-600">0</span>
-                </button>
-                <button type="button" id="doc-cat-btn-orders" onclick="setDocumentCategoryFilter('orders')" class="px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1.5 text-slate-600 hover:text-slate-900 hover:bg-slate-100">
-                  <i data-lucide="scroll-text" class="w-3.5 h-3.5 text-amber-600"></i>
-                  <span>📜 ഉത്തരവുകൾ</span>
-                  <span id="doc-badge-orders" class="px-1.5 py-0.2 rounded-full text-[10px] bg-slate-100 text-slate-600">0</span>
-                </button>
-              </div>
-            </div>
+              <!-- Sub-toolbar inside the card -->
+              <div class="p-3.5 sm:p-4 bg-white flex flex-col xl:flex-row xl:items-center justify-between gap-3 no-print">
+                <div class="flex flex-col sm:flex-row flex-1 items-stretch sm:items-center gap-2.5 min-w-0">
+                  <div class="relative flex-1 min-w-0">
+                    <i data-lucide="search" class="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none"></i>
+                    <input type="text" id="doc-search" oninput="renderDocuments()" placeholder="ഈ കാർഡിൽ കത്ത് / നമ്പർ, വിഷയം പ്രകാരം തിരയുക..." class="ui-control w-full pl-10 pr-3 border border-slate-200 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500" />
+                  </div>
+                  <input type="hidden" id="doc-filter-council" value="കേരള സ്റ്റേറ്റ് ലൈബ്രറി കൗൺസിൽ" />
 
-            <!-- Sub-toolbar inside the card -->
-            <div class="p-3.5 sm:p-4 bg-white border-b border-slate-100 flex flex-col xl:flex-row xl:items-center justify-between gap-3 no-print">
-              <div class="flex flex-col sm:flex-row flex-1 items-stretch sm:items-center gap-2.5 min-w-0">
-                <div class="relative flex-1 min-w-0">
-                  <i data-lucide="search" class="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none"></i>
-                  <input type="text" id="doc-search" oninput="renderDocuments()" placeholder="ഈ കാർഡിൽ കത്ത് / നമ്പർ, വിഷയം പ്രകാരം തിരയുക..." class="ui-control w-full pl-10 pr-3 border border-slate-200 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500" />
+                  <!-- Inward / Outward Sub-filter (Shown when 'letters' or 'all' is active) -->
+                  <div id="doc-subfilter-wrap" class="flex-shrink-0">
+                    <select id="doc-filter-type" onchange="renderDocuments()" class="ui-control w-full sm:w-44 border border-slate-200 px-3 text-xs sm:text-sm bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500 font-medium">
+                      <option value="">എല്ലാ ഇനങ്ങളും (All)</option>
+                      <option value="Inward">ലഭിച്ച കത്ത് (Inward)</option>
+                      <option value="Outward">അയച്ച കത്ത് (Outward)</option>
+                      <option value="Order">ഉത്തരവുകൾ / സർക്കുലറുകൾ</option>
+                    </select>
+                  </div>
                 </div>
-                <input type="hidden" id="doc-filter-council" value="കേരള സ്റ്റേറ്റ് ലൈബ്രറി കൗൺസിൽ" />
 
-                <!-- Inward / Outward Sub-filter (Shown when 'letters' or 'all' is active) -->
-                <div id="doc-subfilter-wrap" class="flex-shrink-0">
-                  <select id="doc-filter-type" onchange="renderDocuments()" class="ui-control w-full sm:w-44 border border-slate-200 px-3 text-xs sm:text-sm bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500 font-medium">
-                    <option value="">എല്ലാ ഇനങ്ങളും (All)</option>
-                    <option value="Inward">ലഭിച്ച കത്ത് (Inward)</option>
-                    <option value="Outward">അയച്ച കത്ത് (Outward)</option>
-                    <option value="Order">ഉത്തരവുകൾ / സർക്കുലറുകൾ</option>
-                  </select>
+                <!-- Action buttons inside the card -->
+                <div class="grid grid-cols-2 sm:flex flex-wrap items-center gap-2 xl:flex-shrink-0">
+                  <button type="button" id="btn-taluk-word-create" onclick="openWordDocumentCreator('തിരൂരങ്ങാടി താലൂക്ക് ലൈബ്രറി കൗൺസിൽ')" class="ui-btn px-3.5 bg-blue-50 text-blue-700 border border-blue-200 hover:bg-blue-100 text-xs sm:text-sm font-semibold shadow-xs transition w-full sm:w-auto flex items-center gap-1.5 hidden" title="തിരൂരങ്ങാടി താലൂക്ക് ലൈബ്രറി കൗൺസിൽ ലെറ്റർഹെഡിൽ Word കത്ത് തയ്യാറാക്കുക">
+                    <i data-lucide="file-edit" class="w-4 h-4 text-blue-600"></i>
+                    <span>Word തയ്യാറാക്കുക</span>
+                  </button>
+                  <button type="button" onclick="generateLettersPDF()" class="ui-btn px-3.5 bg-indigo-50 text-indigo-700 border border-indigo-200 hover:bg-indigo-100 text-xs sm:text-sm font-semibold shadow-xs transition w-full sm:w-auto">
+                    <i data-lucide="file-down" class="w-4 h-4 flex-shrink-0"></i>
+                    <span id="doc-btn-pdf-label">കൗൺസിൽ PDF</span>
+                  </button>
+                  <button type="button" onclick="openDocumentModalWithCategory('letter')" class="ui-btn px-3.5 bg-emerald-600 hover:bg-emerald-700 text-white text-xs sm:text-sm font-semibold shadow-xs transition w-full sm:w-auto flex items-center gap-1.5" title="ഈ കൗൺസിലിൽ പുതിയ കത്ത് ചേർക്കുക">
+                    <i data-lucide="mail" class="w-4 h-4 flex-shrink-0"></i>
+                    <span>+ പുതിയ കത്ത്</span>
+                  </button>
+                  <button type="button" onclick="openDocumentModalWithCategory('order')" class="ui-btn px-3.5 bg-amber-600 hover:bg-amber-700 text-white text-xs sm:text-sm font-semibold shadow-xs transition w-full sm:w-auto flex items-center gap-1.5" title="ഈ കൗൺസിലിൽ പുതിയ ഉത്തരവ് / സർക്കുലർ ചേർക്കുക">
+                    <i data-lucide="scroll-text" class="w-4 h-4 flex-shrink-0"></i>
+                    <span>+ പുതിയ ഉത്തരവ്</span>
+                  </button>
+                  <button type="button" onclick="deleteActiveCouncilDocuments()" class="ui-btn px-3 bg-rose-50 text-rose-700 border border-rose-200 hover:bg-rose-100 text-xs sm:text-sm font-semibold shadow-xs transition w-full sm:w-auto" title="ഈ കൗൺസിലിലെ രേഖകൾ നീക്കം ചെയ്യുക">
+                    <i data-lucide="trash-2" class="w-4 h-4 flex-shrink-0"></i>
+                    <span>എല്ലാം ഒഴിവാക്കുക</span>
+                  </button>
                 </div>
-              </div>
-
-              <!-- Action buttons inside the card -->
-              <div class="grid grid-cols-2 sm:flex flex-wrap items-center gap-2 xl:flex-shrink-0">
-                <button type="button" id="btn-taluk-word-create" onclick="openWordDocumentCreator('തിരൂരങ്ങാടി താലൂക്ക് ലൈബ്രറി കൗൺസിൽ')" class="ui-btn px-3.5 bg-blue-50 text-blue-700 border border-blue-200 hover:bg-blue-100 text-xs sm:text-sm font-semibold shadow-xs transition w-full sm:w-auto flex items-center gap-1.5 hidden" title="തിരൂരങ്ങാടി താലൂക്ക് ലൈബ്രറി കൗൺസിൽ ലെറ്റർഹെഡിൽ Word കത്ത് തയ്യാറാക്കുക">
-                  <i data-lucide="file-edit" class="w-4 h-4 text-blue-600"></i>
-                  <span>Word തയ്യാറാക്കുക</span>
-                </button>
-                <button type="button" onclick="generateLettersPDF()" class="ui-btn px-3.5 bg-indigo-50 text-indigo-700 border border-indigo-200 hover:bg-indigo-100 text-xs sm:text-sm font-semibold shadow-xs transition w-full sm:w-auto">
-                  <i data-lucide="file-down" class="w-4 h-4 flex-shrink-0"></i>
-                  <span id="doc-btn-pdf-label">കൗൺസിൽ PDF</span>
-                </button>
-                <button type="button" onclick="openDocumentModalWithCategory('letter')" class="ui-btn px-3.5 bg-emerald-600 hover:bg-emerald-700 text-white text-xs sm:text-sm font-semibold shadow-xs transition w-full sm:w-auto flex items-center gap-1.5" title="ഈ കൗൺസിലിൽ പുതിയ കത്ത് ചേർക്കുക">
-                  <i data-lucide="mail" class="w-4 h-4 flex-shrink-0"></i>
-                  <span>+ പുതിയ കത്ത്</span>
-                </button>
-                <button type="button" onclick="openDocumentModalWithCategory('order')" class="ui-btn px-3.5 bg-amber-600 hover:bg-amber-700 text-white text-xs sm:text-sm font-semibold shadow-xs transition w-full sm:w-auto flex items-center gap-1.5" title="ഈ കൗൺസിലിൽ പുതിയ ഉത്തരവ് / സർക്കുലർ ചേർക്കുക">
-                  <i data-lucide="scroll-text" class="w-4 h-4 flex-shrink-0"></i>
-                  <span>+ പുതിയ ഉത്തരവ്</span>
-                </button>
-                <button type="button" onclick="deleteActiveCouncilDocuments()" class="ui-btn px-3 bg-rose-50 text-rose-700 border border-rose-200 hover:bg-rose-100 text-xs sm:text-sm font-semibold shadow-xs transition w-full sm:w-auto" title="ഈ കൗൺസിലിലെ രേഖകൾ നീക്കം ചെയ്യുക">
-                  <i data-lucide="trash-2" class="w-4 h-4 flex-shrink-0"></i>
-                  <span>എല്ലാം ഒഴിവാക്കുക</span>
-                </button>
               </div>
             </div>
 
             <!-- Documents Table inside the card -->
-            <div class="table-scroll-wrap custom-scrollbar">
+            <div class="table-scroll-wrap custom-scrollbar flex-1 min-h-0">
               <table class="w-full text-sm text-left text-slate-600 responsive-table">
-                <thead class="bg-slate-50/80 text-slate-600 uppercase text-xs font-semibold border-b border-slate-200">
+                <thead class="bg-slate-50 text-slate-600 uppercase text-xs font-semibold border-b border-slate-200">
                   <tr>
                     <th id="th-doc-council" class="p-3.5 whitespace-nowrap hidden">കൗൺസിൽ</th>
                     <th class="p-3.5 whitespace-nowrap">ഇനം (Type)</th>
@@ -1524,49 +1640,52 @@
              5B. OFFICE FILES REGISTER TAB
         =============================================== -->
         <section id="tab-files" class="tab-content hidden space-y-4 sm:space-y-5">
-          <!-- Toolbar -->
-          <div class="bg-white p-3.5 sm:p-4 rounded-2xl border border-slate-200 flex flex-col lg:flex-row lg:items-center justify-between gap-3 shadow-sm no-print">
-            <div class="flex flex-col sm:flex-row flex-1 items-stretch sm:items-center gap-2.5 min-w-0">
-              <div class="relative flex-1 min-w-0 lg:max-w-md">
-                <i data-lucide="search" class="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none"></i>
-                <input type="text" id="file-search" oninput="renderFiles()" placeholder="ഫയൽ നമ്പർ, വിഷയം, വിഭാഗം പ്രകാരം തിരയുക..." class="ui-control w-full pl-10 pr-3 border border-slate-200 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500" />
+          <!-- Page Head (Sticky / Fixed No Scroll) -->
+          <div class="app-page-head sticky top-0 z-30 bg-slate-100 pb-2.5 -mt-1 pt-1">
+            <!-- Toolbar -->
+            <div class="bg-white p-3.5 sm:p-4 rounded-2xl border border-slate-200 flex flex-col lg:flex-row lg:items-center justify-between gap-3 shadow-sm no-print">
+              <div class="flex flex-col sm:flex-row flex-1 items-stretch sm:items-center gap-2.5 min-w-0">
+                <div class="relative flex-1 min-w-0 lg:max-w-md">
+                  <i data-lucide="search" class="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none"></i>
+                  <input type="text" id="file-search" oninput="renderFiles()" placeholder="ഫയൽ നമ്പർ, വിഷയം, വിഭാഗം പ്രകാരം തിരയുക..." class="ui-control w-full pl-10 pr-3 border border-slate-200 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500" />
+                </div>
+                <select id="file-filter-status" onchange="renderFiles()" class="ui-control w-full sm:w-48 border border-slate-200 px-3 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500">
+                  <option value="">എല്ലാ അവസ്ഥകളും (All Status)</option>
+                  <option value="Active">ആക്ടീവ് (നടപടിയിലുള്ളവ)</option>
+                  <option value="Pending">തീർപ്പുകൽപ്പിക്കാത്തവ (Pending)</option>
+                  <option value="Closed">തീർപ്പാക്കിയവ (Closed)</option>
+                </select>
+                <select id="file-filter-category" onchange="renderFiles()" class="ui-control w-full sm:w-48 border border-slate-200 px-3 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500">
+                  <option value="">എല്ലാ വിഭാഗങ്ങളും (All Sections)</option>
+                  <option value="ഭരണം">ഭരണവിഭാഗം (Administration)</option>
+                  <option value="പദ്ധതികൾ">പദ്ധതികൾ (Schemes)</option>
+                  <option value="അക്കൗണ്ട്സ്">അക്കൗണ്ട്സ് & ഫിനാൻസ്</option>
+                  <option value="ഗ്രേഡിംഗ്">ലൈബ്രറികൾ & ഗ്രേഡിംഗ്</option>
+                  <option value="ഓഡിറ്റ്">ഓഡിറ്റ് (Audit)</option>
+                  <option value="ജനറൽ">ജനറൽ (General)</option>
+                </select>
               </div>
-              <select id="file-filter-status" onchange="renderFiles()" class="ui-control w-full sm:w-48 border border-slate-200 px-3 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500">
-                <option value="">എല്ലാ അവസ്ഥകളും (All Status)</option>
-                <option value="Active">ആക്ടീവ് (നടപടിയിലുള്ളവ)</option>
-                <option value="Pending">തീർപ്പുകൽപ്പിക്കാത്തവ (Pending)</option>
-                <option value="Closed">തീർപ്പാക്കിയവ (Closed)</option>
-              </select>
-              <select id="file-filter-category" onchange="renderFiles()" class="ui-control w-full sm:w-48 border border-slate-200 px-3 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500">
-                <option value="">എല്ലാ വിഭാഗങ്ങളും (All Sections)</option>
-                <option value="ഭരണം">ഭരണവിഭാഗം (Administration)</option>
-                <option value="പദ്ധതികൾ">പദ്ധതികൾ (Schemes)</option>
-                <option value="അക്കൗണ്ട്സ്">അക്കൗണ്ട്സ് & ഫിനാൻസ്</option>
-                <option value="ഗ്രേഡിംഗ്">ലൈബ്രറികൾ & ഗ്രേഡിംഗ്</option>
-                <option value="ഓഡിറ്റ്">ഓഡിറ്റ് (Audit)</option>
-                <option value="ജനറൽ">ജനറൽ (General)</option>
-              </select>
-            </div>
 
-            <div class="grid grid-cols-2 sm:flex flex-wrap items-center gap-2 lg:flex-shrink-0">
-              <button onclick="generateFilesPDF()" class="ui-btn px-3.5 bg-teal-50 text-teal-800 border border-teal-200 hover:bg-teal-100 text-xs sm:text-sm font-semibold shadow-sm transition w-full sm:w-auto">
-                <i data-lucide="file-down" class="w-4 h-4 flex-shrink-0"></i>
-                <span>ഫയലുകൾ PDF</span>
-              </button>
-              <button onclick="openFileModal()" class="ui-btn px-4 bg-emerald-600 hover:bg-emerald-700 text-white text-xs sm:text-sm font-semibold shadow transition w-full sm:w-auto">
-                <i data-lucide="plus" class="w-4 h-4 flex-shrink-0"></i>
-                <span>പുതിയ ഫയൽ ചേർക്കുക</span>
-              </button>
-              <button onclick="deleteAllFiles()" class="ui-btn px-3 bg-rose-50 text-rose-700 border border-rose-200 hover:bg-rose-100 text-xs sm:text-sm font-semibold shadow-sm transition w-full sm:w-auto" title="എല്ലാ ഫയലുകളും നീക്കം ചെയ്യുക">
-                <i data-lucide="trash-2" class="w-4 h-4 flex-shrink-0"></i>
-                <span>എല്ലാം ഒഴിവാക്കുക</span>
-              </button>
+              <div class="grid grid-cols-2 sm:flex flex-wrap items-center gap-2 lg:flex-shrink-0">
+                <button onclick="generateFilesPDF()" class="ui-btn px-3.5 bg-teal-50 text-teal-800 border border-teal-200 hover:bg-teal-100 text-xs sm:text-sm font-semibold shadow-sm transition w-full sm:w-auto">
+                  <i data-lucide="file-down" class="w-4 h-4 flex-shrink-0"></i>
+                  <span>ഫയലുകൾ PDF</span>
+                </button>
+                <button onclick="openFileModal()" class="ui-btn px-4 bg-emerald-600 hover:bg-emerald-700 text-white text-xs sm:text-sm font-semibold shadow transition w-full sm:w-auto">
+                  <i data-lucide="plus" class="w-4 h-4 flex-shrink-0"></i>
+                  <span>പുതിയ ഫയൽ ചേർക്കുക</span>
+                </button>
+                <button onclick="deleteAllFiles()" class="ui-btn px-3 bg-rose-50 text-rose-700 border border-rose-200 hover:bg-rose-100 text-xs sm:text-sm font-semibold shadow-sm transition w-full sm:w-auto" title="എല്ലാ ഫയലുകളും നീക്കം ചെയ്യുക">
+                  <i data-lucide="trash-2" class="w-4 h-4 flex-shrink-0"></i>
+                  <span>എല്ലാം ഒഴിവാക്കുക</span>
+                </button>
+              </div>
             </div>
           </div>
 
           <!-- Files Table -->
-          <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
-            <div class="table-scroll-wrap custom-scrollbar">
+          <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden flex-1 min-h-0 flex flex-col">
+            <div class="table-scroll-wrap custom-scrollbar flex-1 min-h-0">
               <table class="w-full text-sm text-left text-slate-600 responsive-table">
                 <thead class="bg-slate-50 text-slate-600 uppercase text-xs font-semibold border-b border-slate-200">
                   <tr>
@@ -1602,76 +1721,79 @@
              5C. REGISTERS TAB (GRANT REGISTER)
         =============================================== -->
         <section id="tab-registers" class="tab-content hidden space-y-4 sm:space-y-5">
-          <!-- Registers Header & Breadcrumb -->
-          <div class="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2.5 pb-1 no-print">
-            <div>
-              <h2 class="text-lg sm:text-xl font-bold text-slate-800 flex items-center gap-2">
-                <i data-lucide="book-marked" class="w-5 h-5 text-amber-600"></i>
-                <span>ഓഫീസ് രജിസ്റ്ററുകൾ (Office Registers)</span>
-              </h2>
-              <p class="text-xs text-slate-500 mt-0.5">ക്യാഷ് ബുക്കിൽ നിന്നും രേഖപ്പെടുത്തിയ ഗ്രാന്റ് വരവ്-ചെലവ് കണക്കുകളും വിനിയോഗ രജിസ്റ്ററും</p>
-            </div>
-            <div class="flex items-center gap-2">
-              <button onclick="generateGrantRegisterPDF()" class="ui-btn px-3.5 py-1.5 bg-amber-50 text-amber-800 border border-amber-200 hover:bg-amber-100 text-xs sm:text-sm font-semibold shadow-xs transition flex items-center gap-1.5">
-                <i data-lucide="file-down" class="w-4 h-4 text-amber-700"></i>
-                <span>ഗ്രാന്റ് രജിസ്റ്റർ PDF</span>
-              </button>
-            </div>
-          </div>
-
-          <!-- Grant Register Summary Stat Cards -->
-          <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 no-print">
-            <!-- Total Received -->
-            <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm flex items-center justify-between">
+          <!-- Page Head: Header & Stat Cards (Sticky / Fixed No Scroll) -->
+          <div class="app-page-head sticky top-0 z-30 bg-slate-100 pb-2.5 -mt-1 pt-1 space-y-3 sm:space-y-4 shadow-2xs">
+            <!-- Registers Header & Breadcrumb -->
+            <div class="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2.5 pb-1 no-print">
               <div>
-                <p class="text-xs font-semibold text-slate-500">ലഭിച്ച ഗ്രാന്റ് (Income)</p>
-                <h4 id="grant-stat-received" class="text-lg sm:text-xl font-extrabold text-emerald-700 mt-1 tabular-nums">₹0.00</h4>
-                <p class="text-[10px] text-slate-400 mt-0.5">സർക്കാർ / കൗൺസിൽ ഗ്രാന്റ്</p>
+                <h2 class="text-lg sm:text-xl font-bold text-slate-800 flex items-center gap-2">
+                  <i data-lucide="book-marked" class="w-5 h-5 text-amber-600"></i>
+                  <span>ഓഫീസ് രജിസ്റ്ററുകൾ (Office Registers)</span>
+                </h2>
+                <p class="text-xs text-slate-500 mt-0.5">ക്യാഷ് ബുക്കിൽ നിന്നും രേഖപ്പെടുത്തിയ ഗ്രാന്റ് വരവ്-ചെലവ് കണക്കുകളും വിനിയോഗ രജിസ്റ്ററും</p>
               </div>
-              <div class="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-600 border border-emerald-100 flex items-center justify-center font-bold">
-                <i data-lucide="arrow-down-left" class="w-5 h-5"></i>
+              <div class="flex items-center gap-2">
+                <button onclick="generateGrantRegisterPDF()" class="ui-btn px-3.5 py-1.5 bg-amber-50 text-amber-800 border border-amber-200 hover:bg-amber-100 text-xs sm:text-sm font-semibold shadow-xs transition flex items-center gap-1.5">
+                  <i data-lucide="file-down" class="w-4 h-4 text-amber-700"></i>
+                  <span>ഗ്രാന്റ് രജിസ്റ്റർ PDF</span>
+                </button>
               </div>
             </div>
 
-            <!-- Total Disbursed -->
-            <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm flex items-center justify-between">
-              <div>
-                <p class="text-xs font-semibold text-slate-500">വിതരണം ചെയ്തത് (Expense)</p>
-                <h4 id="grant-stat-disbursed" class="text-lg sm:text-xl font-extrabold text-rose-700 mt-1 tabular-nums">₹0.00</h4>
-                <p class="text-[10px] text-slate-400 mt-0.5">ലൈബ്രറികൾക്ക് നൽകിയ തുക</p>
+            <!-- Grant Register Summary Stat Cards -->
+            <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 no-print">
+              <!-- Total Received -->
+              <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm flex items-center justify-between">
+                <div>
+                  <p class="text-xs font-semibold text-slate-500">ലഭിച്ച ഗ്രാന്റ് (Income)</p>
+                  <h4 id="grant-stat-received" class="text-lg sm:text-xl font-extrabold text-emerald-700 mt-1 tabular-nums">₹0.00</h4>
+                  <p class="text-[10px] text-slate-400 mt-0.5">സർക്കാർ / കൗൺസിൽ ഗ്രാന്റ്</p>
+                </div>
+                <div class="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-600 border border-emerald-100 flex items-center justify-center font-bold">
+                  <i data-lucide="arrow-down-left" class="w-5 h-5"></i>
+                </div>
               </div>
-              <div class="w-10 h-10 rounded-xl bg-rose-50 text-rose-600 border border-rose-100 flex items-center justify-center font-bold">
-                <i data-lucide="arrow-up-right" class="w-5 h-5"></i>
-              </div>
-            </div>
 
-            <!-- Net Balance -->
-            <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm flex items-center justify-between">
-              <div>
-                <p class="text-xs font-semibold text-slate-500">ഗ്രാന്റ് നീക്കിയിരിപ്പ് (Balance)</p>
-                <h4 id="grant-stat-balance" class="text-lg sm:text-xl font-extrabold text-amber-700 mt-1 tabular-nums">₹0.00</h4>
-                <p class="text-[10px] text-slate-400 mt-0.5">അവശേഷിക്കുന്ന ഗ്രാന്റ് വിഹിതം</p>
+              <!-- Total Disbursed -->
+              <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm flex items-center justify-between">
+                <div>
+                  <p class="text-xs font-semibold text-slate-500">വിതരണം ചെയ്തത് (Expense)</p>
+                  <h4 id="grant-stat-disbursed" class="text-lg sm:text-xl font-extrabold text-rose-700 mt-1 tabular-nums">₹0.00</h4>
+                  <p class="text-[10px] text-slate-400 mt-0.5">ലൈബ്രറികൾക്ക് നൽകിയ തുക</p>
+                </div>
+                <div class="w-10 h-10 rounded-xl bg-rose-50 text-rose-600 border border-rose-100 flex items-center justify-center font-bold">
+                  <i data-lucide="arrow-up-right" class="w-5 h-5"></i>
+                </div>
               </div>
-              <div class="w-10 h-10 rounded-xl bg-amber-50 text-amber-600 border border-amber-100 flex items-center justify-center font-bold">
-                <i data-lucide="wallet" class="w-5 h-5"></i>
-              </div>
-            </div>
 
-            <!-- Transaction Count -->
-            <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm flex items-center justify-between">
-              <div>
-                <p class="text-xs font-semibold text-slate-500">ആകെ ഗ്രാന്റ് ഇടപാടുകൾ</p>
-                <h4 id="grant-stat-count" class="text-lg sm:text-xl font-extrabold text-slate-800 mt-1 tabular-nums">0</h4>
-                <p class="text-[10px] text-slate-400 mt-0.5">രജിസ്റ്ററിലെ ആകെ രേഖകൾ</p>
+              <!-- Net Balance -->
+              <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm flex items-center justify-between">
+                <div>
+                  <p class="text-xs font-semibold text-slate-500">ഗ്രാന്റ് നീക്കിയിരിപ്പ് (Balance)</p>
+                  <h4 id="grant-stat-balance" class="text-lg sm:text-xl font-extrabold text-amber-700 mt-1 tabular-nums">₹0.00</h4>
+                  <p class="text-[10px] text-slate-400 mt-0.5">അവശേഷിക്കുന്ന ഗ്രാന്റ് വിഹിതം</p>
+                </div>
+                <div class="w-10 h-10 rounded-xl bg-amber-50 text-amber-600 border border-amber-100 flex items-center justify-center font-bold">
+                  <i data-lucide="wallet" class="w-5 h-5"></i>
+                </div>
               </div>
-              <div class="w-10 h-10 rounded-xl bg-slate-50 text-slate-600 border border-slate-200 flex items-center justify-center font-bold">
-                <i data-lucide="receipt" class="w-5 h-5"></i>
+
+              <!-- Transaction Count -->
+              <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm flex items-center justify-between">
+                <div>
+                  <p class="text-xs font-semibold text-slate-500">ആകെ ഗ്രാന്റ് ഇടപാടുകൾ</p>
+                  <h4 id="grant-stat-count" class="text-lg sm:text-xl font-extrabold text-slate-800 mt-1 tabular-nums">0</h4>
+                  <p class="text-[10px] text-slate-400 mt-0.5">രജിസ്റ്ററിലെ ആകെ രേഖകൾ</p>
+                </div>
+                <div class="w-10 h-10 rounded-xl bg-slate-50 text-slate-600 border border-slate-200 flex items-center justify-center font-bold">
+                  <i data-lucide="receipt" class="w-5 h-5"></i>
+                </div>
               </div>
             </div>
           </div>
 
           <!-- Main Grant Register Card & Workspace -->
-          <div class="bg-white rounded-2xl border-2 border-amber-500/80 shadow-sm overflow-hidden">
+          <div class="bg-white rounded-2xl border-2 border-amber-500/80 shadow-sm overflow-hidden flex-1 min-h-0 flex flex-col">
             <!-- Card Banner -->
             <div class="bg-amber-50/60 p-4 sm:p-5 border-b border-amber-200/70 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
               <div class="flex items-center gap-3 min-w-0">
@@ -1722,7 +1844,7 @@
             </div>
 
             <!-- Table of Grant Entries -->
-            <div class="table-scroll-wrap custom-scrollbar">
+            <div class="table-scroll-wrap custom-scrollbar flex-1 min-h-0">
               <table class="w-full text-sm text-left text-slate-600 responsive-table">
                 <thead class="bg-slate-50 text-slate-600 uppercase text-xs font-semibold border-b border-slate-200">
                   <tr>
@@ -2695,7 +2817,12 @@
           </div>
 
           <div>
-            <label class="block font-medium text-slate-700 mb-1">കത്തിന്റെ ഉള്ളടക്കം (Document Body)</label>
+            <div class="flex items-center justify-between gap-2 mb-1">
+              <label class="block font-medium text-slate-700">കത്തിന്റെ ഉള്ളടക്കം (Document Body)</label>
+              <button type="button" onclick="insertWordPageBreak()" class="text-[11px] font-bold text-blue-700 hover:text-blue-900 bg-blue-50 hover:bg-blue-100 border border-blue-200 px-2 py-0.5 rounded transition inline-flex items-center gap-1" title="പേജ് ബ്രേക്ക് ചേർക്കുക">
+                <i data-lucide="file-text" class="w-3 h-3"></i> <span>+ പേജ് ബ്രേക്ക് (Page Break)</span>
+              </button>
+            </div>
             <textarea id="word-form-body" rows="6" oninput="updateWordLivePreview()" placeholder="കത്തിന്റെ അല്ലെങ്കിൽ ഉത്തരവിന്റെ വിശദമായ ഉള്ളടക്കം ഇവിടെ ടൈപ്പ് ചെയ്യുക..." class="w-full px-3 py-2 border rounded-xl border-slate-200 focus:ring-2 focus:ring-blue-500 focus:outline-none text-xs sm:text-sm leading-relaxed"></textarea>
           </div>
 
@@ -5823,7 +5950,7 @@
           <td class="p-3 text-right font-mono text-red-300 mobile-hide-dash">—</td>
           <td class="p-3 text-right font-mono text-red-300 mobile-hide-dash">—</td>
           <td data-label="കൈവശം (Hand)" class="p-3 text-right font-black font-mono tabular-nums whitespace-nowrap text-red-700">₹${formatNumber(dayOpHand)}</td>
-          <td data-label="ബാങ്ക് (Bank)" class="p-3 text-right font-black font-mono tabular-nums whitespace-nowrap text-red-700 no-mobile-border">₹${formatNumber(dayOpHand)}</td>
+          <td data-label="ബാങ്ക് (Bank)" class="p-3 text-right font-black font-mono tabular-nums whitespace-nowrap text-red-700 no-mobile-border">₹${formatNumber(dayOpBank)}</td>
           <td class="p-3 text-center text-red-300 mobile-hide-dash">—</td>
         `;
         tbody.appendChild(dayOpRow);
@@ -7874,6 +8001,18 @@ const TALUK_SIGNATURE_BASE64 = "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQEAyADIA
       return rawDate;
     }
 
+    window.insertWordPageBreak = function() {
+      const ta = document.getElementById('word-form-body');
+      if (!ta) return;
+      const breakToken = '\n\n[--- PAGE BREAK ---]\n\n';
+      const start = ta.selectionStart != null ? ta.selectionStart : ta.value.length;
+      const end = ta.selectionEnd != null ? ta.selectionEnd : ta.value.length;
+      ta.value = ta.value.substring(0, start) + breakToken + ta.value.substring(end);
+      ta.selectionStart = ta.selectionEnd = start + breakToken.length;
+      ta.focus();
+      if (typeof updateWordLivePreview === 'function') updateWordLivePreview();
+    };
+
     window.updateWordLivePreview = function() {
       const container = document.getElementById('word-preview-container');
       if (!container) return;
@@ -7891,6 +8030,12 @@ const TALUK_SIGNATURE_BASE64 = "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQEAyADIA
       const copyTo = document.getElementById('word-form-copy')?.value || '';
 
       const bodyParagraphs = bodyText.split('\n\n').filter(p => p.trim()).map(p => {
+        const trimmed = p.trim();
+        if (trimmed === '[--- PAGE BREAK ---]' || trimmed === '---page-break---') {
+          return `<div class="my-4 py-2 text-center border-t-2 border-dashed border-slate-300 text-slate-500 font-bold text-xs select-none">
+            <span class="bg-slate-100 px-3 py-1 rounded-full border border-slate-200">📄 പേജ് ബ്രേക്ക് (PAGE BREAK)</span>
+          </div>`;
+        }
         return `<p class="text-justify leading-relaxed mb-3 indent-6 text-slate-800" style="text-indent: 2rem; line-height: 1.65; margin-bottom: 12px;">${escapeHtml(p).replace(/\n/g, '<br/>')}</p>`;
       }).join('');
 
@@ -7980,7 +8125,13 @@ const TALUK_SIGNATURE_BASE64 = "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQEAyADIA
       const cleanBodyHtml = bodyText
         .split('\n\n')
         .filter(p => p.trim())
-        .map(p => `<p style="margin: 0 0 12pt 0; text-align: justify; text-indent: 28pt; line-height: 1.6; font-size: 11pt;">${escapeHtml(p).replace(/\n/g, '<br/>')}</p>`)
+        .map(p => {
+          const trimmed = p.trim();
+          if (trimmed === '[--- PAGE BREAK ---]' || trimmed === '---page-break---') {
+            return `<br clear="all" style="page-break-before:always; mso-break-type:section-break" /><div style="page-break-before: always; break-before: page; margin: 20pt 0; text-align: center; border-top: 1.5pt dashed #94a3b8; padding-top: 4pt; font-size: 9pt; color: #64748b; font-weight: bold;">——— പേജ് ബ്രേക്ക് (PAGE BREAK) ———</div>`;
+          }
+          return `<p style="margin: 0 0 12pt 0; text-align: justify; text-indent: 28pt; line-height: 1.6; font-size: 11pt;">${escapeHtml(p).replace(/\n/g, '<br/>')}</p>`;
+        })
         .join('');
 
       return `<!DOCTYPE html>
@@ -8163,15 +8314,21 @@ const TALUK_SIGNATURE_BASE64 = "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQEAyADIA
         </w:p>`).join('');
 
       const bodyParagraphs = bodyText.split('\n\n').filter(p => p.trim());
-      const bodyXml = bodyParagraphs.map(p => `
+      const bodyXml = bodyParagraphs.map(p => {
+        const trimmed = p.trim();
+        if (trimmed === '[--- PAGE BREAK ---]' || trimmed === '---page-break---') {
+          return `<w:p><w:r><w:br w:type="page"/></w:r></w:p>`;
+        }
+        return `
         <w:p>
           <w:pPr>
             <w:ind w:firstLine="720"/>
             <w:jc w:val="both"/>
             <w:spacing w:after="160" w:line="360" w:lineRule="auto"/>
           </w:pPr>
-          <w:r><w:rPr><w:rFonts w:ascii="Meera" w:hAnsi="Meera" w:cs="Meera"/><w:sz w:val="28"/><w:szCs w:val="28"/></w:rPr><w:t xml:space="preserve">${_escapeXml(p.trim())}</w:t></w:r>
-        </w:p>`).join('');
+          <w:r><w:rPr><w:rFonts w:ascii="Meera" w:hAnsi="Meera" w:cs="Meera"/><w:sz w:val="28"/><w:szCs w:val="28"/></w:rPr><w:t xml:space="preserve">${_escapeXml(trimmed)}</w:t></w:r>
+        </w:p>`;
+      }).join('');
 
       const sigXml = includeSig ? `
         <w:p>
@@ -9299,7 +9456,7 @@ window.generateFilesPDF = async function() {
               scrollY: 0
             },
             jsPDF: { unit: 'mm', format: 'a4', orientation: orientation },
-            pagebreak: { mode: ['css', 'legacy'] }
+            pagebreak: { mode: ['avoid-all', 'css', 'legacy'] }
           };
 
           await window.html2pdf().set(opt).from(docBox).save();
@@ -9368,8 +9525,8 @@ window.generateFilesPDF = async function() {
       ` : '';
 
       return `
-        <table style="width: 100%; border-collapse: collapse; margin-bottom: 14px;">
-          <thead><tr>${thHtml}</tr></thead>
+        <table style="width: 100%; border-collapse: collapse; margin-bottom: 14px; page-break-inside: auto;">
+          <thead style="display: table-header-group;"><tr>${thHtml}</tr></thead>
           <tbody>${bodyRowsHtml}</tbody>
           ${footHtml}
         </table>
@@ -9539,9 +9696,57 @@ window.generateFilesPDF = async function() {
 
       const cellBorder = '1px solid #64748b';
       const centerDivider = '2.2px solid #0f172a';
+
+      const colgroupHtml = `
+        <colgroup>
+          <col style="width: 7.2%;" />
+          <col style="width: 3.8%;" />
+          <col style="width: 5.5%;" />
+          <col style="width: 18.5%;" />
+          <col style="width: 7.5%;" />
+          <col style="width: 7.5%;" />
+          <col style="width: 7.2%;" />
+          <col style="width: 3.8%;" />
+          <col style="width: 5.5%;" />
+          <col style="width: 18.5%;" />
+          <col style="width: 7.5%;" />
+          <col style="width: 7.5%;" />
+        </colgroup>
+      `;
+
+      const renderTableThead = () => `
+        <thead style="display: table-header-group;">
+          <tr>
+            <th colspan="6" style="padding: 7px 10px; background: #0f766e; color: #ffffff; text-align: center; border: 1.5px solid #0f172a; border-right: ${centerDivider}; font-family: 'Noto Sans Malayalam', 'Nirmala UI', sans-serif;">
+              <div style="font-size: 13px; font-weight: 800; letter-spacing: 0;">വരവ്</div>
+              <div style="font-size: 9px; font-weight: 600; opacity: 0.92; letter-spacing: 0.05em; margin-top: 1px;">RECEIPTS</div>
+            </th>
+            <th colspan="6" style="padding: 7px 10px; background: #0f766e; color: #ffffff; text-align: center; border: 1.5px solid #0f172a; font-family: 'Noto Sans Malayalam', 'Nirmala UI', sans-serif;">
+              <div style="font-size: 13px; font-weight: 800; letter-spacing: 0;">ചെലവ്</div>
+              <div style="font-size: 9px; font-weight: 600; opacity: 0.92; letter-spacing: 0.05em; margin-top: 1px;">PAYMENTS</div>
+            </th>
+          </tr>
+          <tr style="background: #f1f5f9; color: #0f172a; font-family: 'Noto Sans Malayalam', 'Nirmala UI', sans-serif;">
+            <th style="padding: 5px 3px; border: 1px solid #334155; font-size: 9px; font-weight: 700; text-align: center;">DATE<br/><span style="font-size:8px; font-weight:600; color:#475569;">തീയതി</span></th>
+            <th style="padding: 5px 2px; border: 1px solid #334155; font-size: 8.5px; font-weight: 700; text-align: center;">LF.No.<br/><span style="font-size:7.5px; font-weight:600; color:#475569;">എൽ.എഫ്.</span></th>
+            <th style="padding: 5px 3px; border: 1px solid #334155; font-size: 9px; font-weight: 700; text-align: center;">Receipt No.<br/><span style="font-size:8px; font-weight:600; color:#475569;">രസീത് No</span></th>
+            <th style="padding: 5px 6px; border: 1px solid #334155; font-size: 9.5px; font-weight: 700; text-align: center;">Particulars<br/><span style="font-size:8px; font-weight:600; color:#475569;">വിവരണം</span></th>
+            <th style="padding: 5px 4px; border: 1px solid #334155; font-size: 9px; font-weight: 700; text-align: right;">Cash<br/><span style="font-size:8px; font-weight:600; color:#475569;">കൈവശം (₹)</span></th>
+            <th style="padding: 5px 4px; border: 1px solid #334155; border-right: ${centerDivider}; font-size: 9px; font-weight: 700; text-align: right;">Bank<br/><span style="font-size:8px; font-weight:600; color:#475569;">ബാങ്ക് (₹)</span></th>
+
+            <th style="padding: 5px 3px; border: 1px solid #334155; font-size: 9px; font-weight: 700; text-align: center;">DATE<br/><span style="font-size:8px; font-weight:600; color:#475569;">തീയതി</span></th>
+            <th style="padding: 5px 2px; border: 1px solid #334155; font-size: 8.5px; font-weight: 700; text-align: center;">LF.No.<br/><span style="font-size:7.5px; font-weight:600; color:#475569;">എൽ.എഫ്.</span></th>
+            <th style="padding: 5px 3px; border: 1px solid #334155; font-size: 9px; font-weight: 700; text-align: center;">Voucher No.<br/><span style="font-size:8px; font-weight:600; color:#475569;">വൗച്ചർ No</span></th>
+            <th style="padding: 5px 6px; border: 1px solid #334155; font-size: 9.5px; font-weight: 700; text-align: center;">Particulars<br/><span style="font-size:8px; font-weight:600; color:#475569;">വിവരണം</span></th>
+            <th style="padding: 5px 4px; border: 1px solid #334155; font-size: 9px; font-weight: 700; text-align: right;">Cash<br/><span style="font-size:8px; font-weight:600; color:#475569;">കൈവശം (₹)</span></th>
+            <th style="padding: 5px 4px; border: 1px solid #334155; font-size: 9px; font-weight: 700; text-align: right;">Bank<br/><span style="font-size:8px; font-weight:600; color:#475569;">ബാങ്ക് (₹)</span></th>
+          </tr>
+        </thead>
+      `;
+
       let pairedBodyHtml = '';
 
-      uniqueDates.forEach((dateStr) => {
+      uniqueDates.forEach((dateStr, dIdx) => {
         const dayOpHand = currentRunningHand;
         const dayOpBank = currentRunningBank;
         const dayEntries = groupedByDate[dateStr] || [];
@@ -9605,9 +9810,10 @@ window.generateFilesPDF = async function() {
         const dayCloseBank = currentRunningBank;
 
         // Receipts for this day: Row 0 is Day Opening B/F, followed by day's receipts
+        // First opening of the statement has empty date cell as requested
         const leftList = [
           {
-            date: formatDateDMY(dateStr),
+            date: dIdx === 0 ? '' : formatDateDMY(dateStr),
             lf: '',
             docNo: '',
             particularsHtml: '<span style="color: #dc2626; font-weight: 800;">മുന്നിരിപ്പ് (To Balance B/F)</span>',
@@ -9619,8 +9825,9 @@ window.generateFilesPDF = async function() {
           ...dayReceipts
         ];
 
-        // Payments for this day: day's expenses, with Day Closing C/F at the final row of the day
-        const dayRowsCount = Math.max(leftList.length, dayPayments.length + 1);
+        // Payments for this day: day's expenses, with Day Closing C/F ALWAYS in its OWN separate final row
+        const maxTxRows = Math.max(leftList.length, dayPayments.length);
+        const dayRowsCount = maxTxRows + 1;
         const rightList = new Array(dayRowsCount).fill(null);
         for (let i = 0; i < dayPayments.length; i++) {
           rightList[i] = dayPayments[i];
@@ -9651,7 +9858,7 @@ window.generateFilesPDF = async function() {
           const rowBg = (r && r.isOpening) || (p && p.isClosing) ? '#fffbfb' : '#ffffff';
 
           pairedBodyHtml += `
-            <tr style="page-break-inside: avoid; background: ${rowBg};">
+            <tr style="page-break-inside: avoid; break-inside: avoid; background: ${rowBg};">
               <td style="padding: 5.5px 5px; border: ${cellBorder}; font-size: 9.5px; white-space: nowrap; text-align: center; vertical-align: top; ${rDateStyle}">${r ? escapeHtml(r.date) : ''}</td>
               <td style="padding: 5.5px 4px; border: ${cellBorder}; font-size: 9.5px; text-align: center; vertical-align: top;">${r ? escapeHtml(r.lf) : ''}</td>
               <td style="padding: 5.5px 5px; border: ${cellBorder}; font-size: 9.5px; text-align: center; vertical-align: top; word-break: break-word;">${r ? r.docNo : ''}</td>
@@ -9669,13 +9876,13 @@ window.generateFilesPDF = async function() {
           `;
         }
 
-        // Day Total row
+        // Day Total row (if multiple dates or statement daily balance)
         const dayTotalCash = dayOpHand + dayIncCash;
         const dayTotalBank = dayOpBank + dayIncBank;
         const dayLabel = uniqueDates.length > 1 ? 'ദിവസത്തെ ആകെ തുക' : 'ആകെ തുക';
 
         pairedBodyHtml += `
-          <tr style="page-break-inside: avoid; background: #f8fafc; font-weight: 700; color: #0f172a; border-top: 1.5px solid #0f172a; border-bottom: 2px solid #0f172a;">
+          <tr style="page-break-inside: avoid; break-inside: avoid; background: #f8fafc; font-weight: 700; color: #0f172a; border-top: 1.5px solid #0f172a; border-bottom: 2px solid #0f172a;">
             <td colspan="4" style="padding: 5.5px 6px; border: ${cellBorder}; font-size: 9.5px; text-align: right; font-weight: 700;">${dayLabel}</td>
             <td style="padding: 5.5px 6px; border: ${cellBorder}; font-size: 9.5px; text-align: right; white-space: nowrap; font-weight: 700;">${escapeHtml(formatAmt2(dayTotalCash))}</td>
             <td style="padding: 5.5px 6px; border: ${cellBorder}; border-right: ${centerDivider}; font-size: 9.5px; text-align: right; white-space: nowrap; font-weight: 700;">${escapeHtml(formatAmt2(dayTotalBank))}</td>
@@ -9697,21 +9904,21 @@ window.generateFilesPDF = async function() {
       const rightGrandBank = totalMonthExpBank + closingBank;
 
       const tfootHtml = uniqueDates.length > 1 ? `
-          <tfoot>
-            <tr style="background: #ecfdf5; font-weight: 800; color: #064e3b; page-break-inside: avoid;">
-              <td colspan="4" style="padding: 6.5px 6px; border: 1.5px solid #0f172a; font-size: 10px; text-align: right;">മാസത്തെ ആകെ തുക</td>
-              <td style="padding: 6.5px 6px; border: 1.5px solid #0f172a; font-size: 9.5px; text-align: right; white-space: nowrap;">${escapeHtml(formatAmt2(leftGrandCash))}</td>
-              <td style="padding: 6.5px 6px; border: 1.5px solid #0f172a; border-right: ${centerDivider}; font-size: 9.5px; text-align: right; white-space: nowrap;">${escapeHtml(formatAmt2(leftGrandBank))}</td>
+        <tfoot style="display: table-footer-group;">
+          <tr style="background: #ecfdf5; font-weight: 800; color: #064e3b; page-break-inside: avoid; border-top: 2.2px solid #0f172a; border-bottom: 2px solid #0f172a;">
+            <td colspan="4" style="padding: 7px 6px; border: 1.5px solid #0f172a; font-size: 10.5px; text-align: right;">മാസത്തെ ആകെ തുക (Grand Total)</td>
+            <td style="padding: 7px 6px; border: 1.5px solid #0f172a; font-size: 10px; text-align: right; white-space: nowrap;">${escapeHtml(formatAmt2(leftGrandCash))}</td>
+            <td style="padding: 7px 6px; border: 1.5px solid #0f172a; border-right: ${centerDivider}; font-size: 10px; text-align: right; white-space: nowrap;">${escapeHtml(formatAmt2(leftGrandBank))}</td>
 
-              <td colspan="4" style="padding: 6.5px 6px; border: 1.5px solid #0f172a; font-size: 10px; text-align: right;">മാസത്തെ ആകെ തുക</td>
-              <td style="padding: 6.5px 6px; border: 1.5px solid #0f172a; font-size: 9.5px; text-align: right; white-space: nowrap;">${escapeHtml(formatAmt2(rightGrandCash))}</td>
-              <td style="padding: 6.5px 6px; border: 1.5px solid #0f172a; font-size: 9.5px; text-align: right; white-space: nowrap;">${escapeHtml(formatAmt2(rightGrandBank))}</td>
-            </tr>
-          </tfoot>
+            <td colspan="4" style="padding: 7px 6px; border: 1.5px solid #0f172a; font-size: 10.5px; text-align: right;">മാസത്തെ ആകെ തുക (Grand Total)</td>
+            <td style="padding: 7px 6px; border: 1.5px solid #0f172a; font-size: 10px; text-align: right; white-space: nowrap;">${escapeHtml(formatAmt2(rightGrandCash))}</td>
+            <td style="padding: 7px 6px; border: 1.5px solid #0f172a; font-size: 10px; text-align: right; white-space: nowrap;">${escapeHtml(formatAmt2(rightGrandBank))}</td>
+          </tr>
+        </tfoot>
       ` : '';
 
       const doubleColumnCashBookHtml = `
-        <div style="background: #e2f0d9; border: 1.5px solid #0f766e; color: #0f172a; text-align: center; font-weight: 800; font-size: 11.5px; padding: 6px 12px; margin-bottom: 8px; border-radius: 4px; font-family: 'Noto Sans Malayalam', 'Nirmala UI', sans-serif;">
+        <div style="background: #e2f0d9; border: 1.5px solid #0f766e; color: #0f172a; text-align: center; font-weight: 800; font-size: 11.5px; padding: 6px 12px; margin-bottom: 10px; border-radius: 4px; font-family: 'Noto Sans Malayalam', 'Nirmala UI', sans-serif; page-break-inside: avoid;">
           <div>${escapeHtml(periodBannerTitle)}</div>
           <div style="font-size: 10px; font-weight: 700; margin-top: 3px; color: #334155;">
             <span style="color: #dc2626;">തുടക്ക മുന്നിരിപ്പ് (Opening B/F): ₹${formatNumber(periodOpHand + periodOpBank)}</span>
@@ -9719,48 +9926,10 @@ window.generateFilesPDF = async function() {
             <span style="color: #dc2626;">അവസാന നീക്കിയിരിപ്പ് (Closing C/F): ₹${formatNumber(closingCombined)}</span>
           </div>
         </div>
-        <table style="width: 100%; border-collapse: collapse; table-layout: fixed; border: 2px solid #0f172a; margin-bottom: 14px; font-family: 'Noto Sans Malayalam', 'Nirmala UI', sans-serif;">
-          <colgroup>
-            <col style="width: 7.2%;" />
-            <col style="width: 3.8%;" />
-            <col style="width: 5.5%;" />
-            <col style="width: 18.5%;" />
-            <col style="width: 7.5%;" />
-            <col style="width: 7.5%;" />
-            <col style="width: 7.2%;" />
-            <col style="width: 3.8%;" />
-            <col style="width: 5.5%;" />
-            <col style="width: 18.5%;" />
-            <col style="width: 7.5%;" />
-            <col style="width: 7.5%;" />
-          </colgroup>
-          <thead>
-            <tr>
-              <th colspan="6" style="padding: 8px 10px; background: #0f766e; color: #ffffff; text-align: center; border: 1.5px solid #0f172a; border-right: ${centerDivider}; font-family: 'Noto Sans Malayalam', 'Nirmala UI', sans-serif;">
-                <div style="font-size: 13px; font-weight: 800; letter-spacing: 0;">വരവ്</div>
-                <div style="font-size: 9px; font-weight: 600; opacity: 0.92; letter-spacing: 0.05em; margin-top: 1px;">RECEIPTS</div>
-              </th>
-              <th colspan="6" style="padding: 8px 10px; background: #0f766e; color: #ffffff; text-align: center; border: 1.5px solid #0f172a; font-family: 'Noto Sans Malayalam', 'Nirmala UI', sans-serif;">
-                <div style="font-size: 13px; font-weight: 800; letter-spacing: 0;">ചെലവ്</div>
-                <div style="font-size: 9px; font-weight: 600; opacity: 0.92; letter-spacing: 0.05em; margin-top: 1px;">PAYMENTS</div>
-              </th>
-            </tr>
-            <tr style="background: #f1f5f9; color: #0f172a; font-family: 'Noto Sans Malayalam', 'Nirmala UI', sans-serif;">
-              <th style="padding: 5px 3px; border: 1px solid #334155; font-size: 9px; font-weight: 700; text-align: center;">DATE<br/><span style="font-size:8px; font-weight:600; color:#475569;">തീയതി</span></th>
-              <th style="padding: 5px 2px; border: 1px solid #334155; font-size: 8.5px; font-weight: 700; text-align: center;">LF.No.<br/><span style="font-size:7.5px; font-weight:600; color:#475569;">എൽ.എഫ്.</span></th>
-              <th style="padding: 5px 3px; border: 1px solid #334155; font-size: 9px; font-weight: 700; text-align: center;">Receipt No.<br/><span style="font-size:8px; font-weight:600; color:#475569;">രസീത് No</span></th>
-              <th style="padding: 5px 6px; border: 1px solid #334155; font-size: 9.5px; font-weight: 700; text-align: center;">Particulars<br/><span style="font-size:8px; font-weight:600; color:#475569;">വിവരണം</span></th>
-              <th style="padding: 5px 4px; border: 1px solid #334155; font-size: 9px; font-weight: 700; text-align: right;">Cash<br/><span style="font-size:8px; font-weight:600; color:#475569;">കൈവശം (₹)</span></th>
-              <th style="padding: 5px 4px; border: 1px solid #334155; border-right: ${centerDivider}; font-size: 9px; font-weight: 700; text-align: right;">Bank<br/><span style="font-size:8px; font-weight:600; color:#475569;">ബാങ്ക് (₹)</span></th>
 
-              <th style="padding: 5px 3px; border: 1px solid #334155; font-size: 9px; font-weight: 700; text-align: center;">DATE<br/><span style="font-size:8px; font-weight:600; color:#475569;">തീയതി</span></th>
-              <th style="padding: 5px 2px; border: 1px solid #334155; font-size: 8.5px; font-weight: 700; text-align: center;">LF.No.<br/><span style="font-size:7.5px; font-weight:600; color:#475569;">എൽ.എഫ്.</span></th>
-              <th style="padding: 5px 3px; border: 1px solid #334155; font-size: 9px; font-weight: 700; text-align: center;">Voucher No.<br/><span style="font-size:8px; font-weight:600; color:#475569;">വൗച്ചർ No</span></th>
-              <th style="padding: 5px 6px; border: 1px solid #334155; font-size: 9.5px; font-weight: 700; text-align: center;">Particulars<br/><span style="font-size:8px; font-weight:600; color:#475569;">വിവരണം</span></th>
-              <th style="padding: 5px 4px; border: 1px solid #334155; font-size: 9px; font-weight: 700; text-align: right;">Cash<br/><span style="font-size:8px; font-weight:600; color:#475569;">കൈവശം (₹)</span></th>
-              <th style="padding: 5px 4px; border: 1px solid #334155; font-size: 9px; font-weight: 700; text-align: right;">Bank<br/><span style="font-size:8px; font-weight:600; color:#475569;">ബാങ്ക് (₹)</span></th>
-            </tr>
-          </thead>
+        <table style="width: 100%; border-collapse: collapse; table-layout: fixed; border: 2px solid #0f172a; margin-bottom: 14px; font-family: 'Noto Sans Malayalam', 'Nirmala UI', sans-serif;">
+          ${colgroupHtml}
+          ${renderTableThead()}
           <tbody>
             ${pairedBodyHtml}
           </tbody>
