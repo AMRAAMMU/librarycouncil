@@ -9879,7 +9879,7 @@ window.generateFilesPDF = async function() {
         // Day Total row (if multiple dates or statement daily balance)
         const dayTotalCash = dayOpHand + dayIncCash;
         const dayTotalBank = dayOpBank + dayIncBank;
-        const dayLabel = uniqueDates.length > 1 ? 'ദിവസത്തെ ആകെ തുക' : 'ആകെ തുക';
+        const dayLabel = 'ആകെ മൊത്തം';
 
         pairedBodyHtml += `
           <tr style="page-break-inside: avoid; break-inside: avoid; background: #f8fafc; font-weight: 700; color: #0f172a; border-top: 1.5px solid #0f172a; border-bottom: 2px solid #0f172a;">
