@@ -1529,23 +1529,29 @@
                   </div>
                 </div>
 
-                <!-- Quick category switch inside card (എല്ലാം vs കത്തുകൾ vs ഉത്തരവുകൾ) -->
-                <div class="flex flex-wrap items-center gap-1.5 p-1 bg-white rounded-xl border border-slate-200 shadow-xs no-print self-start md:self-auto">
-                  <button type="button" id="doc-cat-btn-all" onclick="setDocumentCategoryFilter('all')" class="px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1.5 bg-indigo-600 text-white shadow-xs">
-                    <i data-lucide="layers" class="w-3.5 h-3.5"></i>
-                    <span>📋 എല്ലാം</span>
-                    <span id="doc-badge-all" class="px-1.5 py-0.2 rounded-full text-[10px] bg-white/20">0</span>
-                  </button>
-                  <button type="button" id="doc-cat-btn-letters" onclick="setDocumentCategoryFilter('letters')" class="px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1.5 text-slate-600 hover:text-slate-900 hover:bg-slate-100">
-                    <i data-lucide="mail" class="w-3.5 h-3.5 text-emerald-600"></i>
-                    <span>✉️ കത്തുകൾ</span>
-                    <span id="doc-badge-letters" class="px-1.5 py-0.2 rounded-full text-[10px] bg-slate-100 text-slate-600">0</span>
-                  </button>
-                  <button type="button" id="doc-cat-btn-orders" onclick="setDocumentCategoryFilter('orders')" class="px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1.5 text-slate-600 hover:text-slate-900 hover:bg-slate-100">
-                    <i data-lucide="scroll-text" class="w-3.5 h-3.5 text-amber-600"></i>
-                    <span>📜 ഉത്തരവുകൾ</span>
-                    <span id="doc-badge-orders" class="px-1.5 py-0.2 rounded-full text-[10px] bg-slate-100 text-slate-600">0</span>
-                  </button>
+                <!-- Quick category switch inside card (ഇനം തിരഞ്ഞെടുക്കുക / Category Selector) -->
+                <div class="flex flex-col items-start md:items-end gap-1.5 no-print self-start md:self-auto">
+                  <div class="flex items-center gap-1.5 text-[11px] font-bold text-slate-500 uppercase tracking-wider">
+                    <i data-lucide="filter" class="w-3.5 h-3.5 text-slate-400"></i>
+                    <span>ഇനം തിരഞ്ഞെടുക്കുക (Category)</span>
+                  </div>
+                  <div class="flex flex-wrap items-center gap-1 p-1 bg-white rounded-xl border border-slate-200 shadow-xs">
+                    <button type="button" id="doc-cat-btn-all" onclick="setDocumentCategoryFilter('all')" class="px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1.5 bg-indigo-600 text-white shadow-xs">
+                      <i data-lucide="layers" class="w-3.5 h-3.5"></i>
+                      <span>📋 എല്ലാം</span>
+                      <span id="doc-badge-all" class="px-1.5 py-0.5 rounded-full text-[10px] font-bold bg-white/20 tabular-nums">0</span>
+                    </button>
+                    <button type="button" id="doc-cat-btn-letters" onclick="setDocumentCategoryFilter('letters')" class="px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1.5 text-slate-600 hover:text-emerald-700 hover:bg-emerald-50">
+                      <i data-lucide="mail" class="w-3.5 h-3.5 text-emerald-600"></i>
+                      <span>✉️ കത്ത് (Letter)</span>
+                      <span id="doc-badge-letters" class="px-1.5 py-0.5 rounded-full text-[10px] font-bold bg-slate-100 text-slate-600 tabular-nums">0</span>
+                    </button>
+                    <button type="button" id="doc-cat-btn-orders" onclick="setDocumentCategoryFilter('orders')" class="px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1.5 text-slate-600 hover:text-amber-700 hover:bg-amber-50">
+                      <i data-lucide="scroll-text" class="w-3.5 h-3.5 text-amber-600"></i>
+                      <span>📜 ഉത്തരവ് (Order)</span>
+                      <span id="doc-badge-orders" class="px-1.5 py-0.5 rounded-full text-[10px] font-bold bg-slate-100 text-slate-600 tabular-nums">0</span>
+                    </button>
+                  </div>
                 </div>
               </div>
 
@@ -1560,7 +1566,7 @@
 
                   <!-- Inward / Outward Sub-filter (Shown when 'letters' or 'all' is active) -->
                   <div id="doc-subfilter-wrap" class="flex-shrink-0">
-                    <select id="doc-filter-type" onchange="renderDocuments()" class="ui-control w-full sm:w-44 border border-slate-200 px-3 text-xs sm:text-sm bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500 font-medium">
+                    <select id="doc-filter-type" onchange="onDocSubFilterChange()" class="ui-control w-full sm:w-44 border border-slate-200 px-3 text-xs sm:text-sm bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500 font-medium">
                       <option value="">എല്ലാ ഇനങ്ങളും (All)</option>
                       <option value="Inward">ലഭിച്ച കത്ത് (Inward)</option>
                       <option value="Outward">അയച്ച കത്ത് (Outward)</option>
@@ -1624,7 +1630,7 @@
               </div>
               <h4 class="font-bold text-slate-700 text-sm sm:text-base">കത്തുകളോ ഉത്തരവുകളോ ഒന്നും കണ്ടെത്തിയില്ല</h4>
               <p class="text-xs text-slate-500 mt-1 max-w-sm mx-auto">ഈ കൗൺസിലിൽ പുതിയ കത്തോ ഉത്തരവോ ചേർക്കാൻ താഴെയുള്ള ബട്ടൺ ക്ലിക്ക് ചെയ്യുക.</p>
-              <button type="button" onclick="openDocumentModal()" class="mt-4 ui-btn px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold shadow-xs">
+              <button type="button" onclick="openActiveCouncilDocumentModal()" class="mt-4 ui-btn px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold shadow-xs">
                 <i data-lucide="plus" class="w-4 h-4"></i>
                 <span>പുതിയ കത്ത് / ഉത്തരവ് ചേർക്കുക</span>
               </button>
@@ -3096,6 +3102,57 @@
       }).format(num);
     };
 
+    window.normalizeCouncilName = function(val) {
+      if (!val) return 'കേരള സ്റ്റേറ്റ് ലൈബ്രറി കൗൺസിൽ';
+      const s = String(val).trim();
+      if (s === 'സംസ്ഥാനം' || s.includes('സ്റ്റേറ്റ്') || s.includes('സംസ്ഥാന') || /state/i.test(s)) {
+        return 'കേരള സ്റ്റേറ്റ് ലൈബ്രറി കൗൺസിൽ';
+      }
+      if (s === 'ജില്ല' || s.includes('മലപ്പുറം') || s.includes('ജില്ലാ') || s.includes('ജില്ല') || /district/i.test(s)) {
+        return 'മലപ്പുറം ജില്ലാ ലൈബ്രറി കൗൺസിൽ';
+      }
+      if (s === 'താലൂക്ക്' || s.includes('തിരൂരങ്ങാടി') || s.includes('താലൂക്ക്') || /taluk/i.test(s)) {
+        return 'തിരൂരങ്ങാടി താലൂക്ക് ലൈബ്രറി കൗൺസിൽ';
+      }
+      if (s === 'മറ്റുള്ളവ' || s.includes('മറ്റുള്ളവ') || /other/i.test(s)) {
+        return 'മറ്റുള്ളവ';
+      }
+      return 'മറ്റുള്ളവ';
+    };
+    const normalizeCouncilName = window.normalizeCouncilName;
+
+    window.getDocumentCouncilKey = function(val) {
+      if (!val) return 'state';
+      const norm = normalizeCouncilName(val);
+      if (norm === 'കേരള സ്റ്റേറ്റ് ലൈബ്രറി കൗൺസിൽ') return 'state';
+      if (norm === 'മലപ്പുറം ജില്ലാ ലൈബ്രറി കൗൺസിൽ') return 'district';
+      if (norm === 'തിരൂരങ്ങാടി താലൂക്ക് ലൈബ്രറി കൗൺസിൽ') return 'taluk';
+      return 'others';
+    };
+    const getDocumentCouncilKey = window.getDocumentCouncilKey;
+
+    window.isDocumentOrder = function(doc) {
+      if (!doc) return false;
+      if (doc.type === 'Order') return true;
+      const subj = String(doc.subject || '');
+      const rem = String(doc.remarks || '');
+      if (subj.includes('[ഉത്തരവ്') || subj.startsWith('[ഉത്തരവ്') || /\[order\]/i.test(subj) || /\[order\]/i.test(rem) || rem.includes('[ഉത്തരവ്]')) {
+        return true;
+      }
+      return false;
+    };
+    const isDocumentOrder = window.isDocumentOrder;
+
+    window.cleanDocumentSubject = function(subject) {
+      if (!subject) return 'വിഷയം (No Subject)';
+      let s = String(subject).trim();
+      s = s.replace(/^\[(ഉത്തരവ്|സർക്കുലർ|Order|Circular)\]\s*/gi, '');
+      s = s.replace(/^\[(കേരള സ്റ്റേറ്റ് ലൈബ്രറി കൗൺസിൽ|മലപ്പുറം ജില്ലാ ലൈബ്രറി കൗൺസിൽ|തിരൂരങ്ങാടി താലൂക്ക് ലൈബ്രറി കൗൺസിൽ|മറ്റുള്ളവ|State Council|District Council|Taluk Council|Others|സംസ്ഥാനം|ജില്ല|താലൂക്ക്)\]\s*/gi, '');
+      s = s.replace(/^\[(ഉത്തരവ്|സർക്കുലർ|Order|Circular)\]\s*/gi, '');
+      return s.trim() || String(subject);
+    };
+    const cleanDocumentSubject = window.cleanDocumentSubject;
+
     function sortCashbookChronological(list) {
       return [...(list || [])].sort((a, b) => {
         const dCmp = String(a.date || '').localeCompare(String(b.date || ''));
@@ -3480,16 +3537,33 @@
         // 5. Documents (Letters & Orders with Persistent Local Attachment Vault)
         const docVault = getDocAttachmentVault();
         dbState.documents = (docsRes.data || []).map(d => {
-          let council = d.council || '';
+          let rawCouncil = d.council || '';
           let subject = d.subject || '';
-          const councilMatch = subject.match(/^\[(.*?)\]\s*(.*)$/);
-          if (councilMatch) {
-            if (!council || council === 'കേരള സ്റ്റേറ്റ് ലൈബ്രറി കൗൺസിൽ') {
-              council = councilMatch[1];
-            }
-            subject = councilMatch[2];
+          let isOrder = d.type === 'Order';
+
+          // Extract [ഉത്തരവ്] / [Order] from subject if present
+          if (subject.includes('[ഉത്തരവ്]')) {
+            isOrder = true;
+            subject = subject.replace(/\[ഉത്തരവ്\]\s*/g, '').trim();
+          } else if (/^\[(ഉത്തരവ്|സർക്കുലർ|Order|Circular)\]/i.test(subject)) {
+            isOrder = true;
+            subject = subject.replace(/^\[(ഉത്തരവ്|സർക്കുലർ|Order|Circular)\]\s*/gi, '').trim();
           }
-          if (!council) council = 'കേരള സ്റ്റേറ്റ് ലൈബ്രറി കൗൺസിൽ';
+
+          // Extract council bracket e.g. [കേരള സ്റ്റേറ്റ് ലൈബ്രറി കൗൺസിൽ] from subject if present
+          const bracketMatch = subject.match(/^\[(.*?)\]\s*(.*)$/);
+          if (bracketMatch) {
+            const potentialCouncil = bracketMatch[1].trim();
+            if (potentialCouncil.includes('കൗൺസിൽ') || potentialCouncil.includes('സ്റ്റേറ്റ്') || potentialCouncil.includes('സംസ്ഥാന') || potentialCouncil.includes('ജില്ല') || potentialCouncil.includes('താലൂക്ക്') || potentialCouncil.includes('മറ്റുള്ളവ') || /council|state|district|taluk|others/i.test(potentialCouncil)) {
+              if (!rawCouncil || rawCouncil === 'കേരള സ്റ്റേറ്റ് ലൈബ്രറി കൗൺസിൽ') {
+                rawCouncil = potentialCouncil;
+              }
+              subject = bracketMatch[2].trim();
+            }
+          }
+
+          const council = normalizeCouncilName(rawCouncil);
+          const docType = isOrder ? 'Order' : (d.type === 'Outward' ? 'Outward' : 'Inward');
 
           let remarks = d.remarks || '';
           let extractedAttName = '';
@@ -3510,12 +3584,12 @@
 
           return {
             id: d.id,
-            type: d.type || 'Inward',
+            type: docType,
             council,
             refNo: d.ref_no,
             date: d.doc_date,
             party: d.party || '',
-            subject,
+            subject: cleanDocumentSubject(subject),
             remarks,
             attachmentName,
             attachmentType,
@@ -3608,6 +3682,19 @@
         if (stored) {
           dbState = JSON.parse(stored);
           if (!dbState.files) dbState.files = [];
+          if (Array.isArray(dbState.documents)) {
+            dbState.documents = dbState.documents.map(d => {
+              const council = normalizeCouncilName(d.council);
+              const isOrder = isDocumentOrder(d);
+              const docType = isOrder ? 'Order' : (d.type === 'Outward' ? 'Outward' : 'Inward');
+              return {
+                ...d,
+                council,
+                type: docType,
+                subject: cleanDocumentSubject(d.subject)
+              };
+            });
+          }
         } else {
           dbState = JSON.parse(JSON.stringify(EMPTY_DATA));
         }
@@ -6722,7 +6809,7 @@
     };
 
     window.selectDocumentCouncil = function(councilName) {
-      window.activeDocumentCouncil = councilName || '';
+      window.activeDocumentCouncil = councilName ? normalizeCouncilName(councilName) : '';
       const filterCouncilInput = document.getElementById('doc-filter-council');
       if (filterCouncilInput) filterCouncilInput.value = window.activeDocumentCouncil;
 
@@ -6760,7 +6847,7 @@
           btnAll.classList.remove('bg-white', 'text-slate-700');
         }
         if (workspace) {
-          workspace.className = 'bg-white rounded-2xl border-2 border-emerald-500 shadow-sm overflow-hidden transition-all';
+          workspace.className = 'bg-white rounded-2xl border-2 border-emerald-500 shadow-sm overflow-hidden transition-all flex flex-col';
         }
         if (headerBanner) {
           headerBanner.className = 'bg-emerald-50/50 p-4 sm:p-5 border-b border-emerald-100 flex flex-col md:flex-row md:items-center justify-between gap-3';
@@ -6779,7 +6866,8 @@
           btnAll.classList.remove('bg-emerald-600', 'text-white', 'border-emerald-600');
           btnAll.classList.add('bg-white', 'text-slate-700');
         }
-        const theme = COUNCIL_THEMES[activeCouncil] || COUNCIL_THEMES['കേരള സ്റ്റേറ്റ് ലൈബ്രറി കൗൺസിൽ'];
+        const norm = normalizeCouncilName(activeCouncil);
+        const theme = COUNCIL_THEMES[norm] || COUNCIL_THEMES['കേരള സ്റ്റേറ്റ് ലൈബ്രറി കൗൺസിൽ'];
 
         const activeCardEl = document.getElementById(theme.cardId);
         const activePillEl = document.getElementById(theme.pillId);
@@ -6790,7 +6878,7 @@
         if (activePillEl) activePillEl.classList.remove('hidden');
 
         if (workspace) {
-          workspace.className = `bg-white rounded-2xl border-2 ${theme.borderClass} shadow-sm overflow-hidden transition-all`;
+          workspace.className = `bg-white rounded-2xl border-2 ${theme.borderClass} shadow-sm overflow-hidden transition-all flex flex-col`;
         }
         if (headerBanner) {
           headerBanner.className = `${theme.bgBanner} p-4 sm:p-5 border-b ${theme.borderBanner} flex flex-col md:flex-row md:items-center justify-between gap-3`;
@@ -6815,63 +6903,120 @@
         }
       }
 
+      syncCategoryFilterUi();
       if (window.lucide) lucide.createIcons();
     }
 
-    window.setDocumentCategoryFilter = function(cat) {
-      window.activeDocumentCategory = cat || 'all';
+    function syncCategoryFilterUi() {
+      const cat = window.activeDocumentCategory || 'all';
+      const activeCouncil = window.activeDocumentCouncil;
+      const theme = activeCouncil ? (COUNCIL_THEMES[normalizeCouncilName(activeCouncil)] || COUNCIL_THEMES['കേരള സ്റ്റേറ്റ് ലൈബ്രറി കൗൺസിൽ']) : null;
+      const allActiveBg = theme ? theme.iconBg : 'bg-emerald-600';
 
       const btnAll = document.getElementById('doc-cat-btn-all');
       const btnLetters = document.getElementById('doc-cat-btn-letters');
       const btnOrders = document.getElementById('doc-cat-btn-orders');
+      const badgeAll = document.getElementById('doc-badge-all');
+      const badgeLetters = document.getElementById('doc-badge-letters');
+      const badgeOrders = document.getElementById('doc-badge-orders');
       const typeSelect = document.getElementById('doc-filter-type');
 
-      [btnAll, btnLetters, btnOrders].forEach(btn => {
-        if (btn) {
-          btn.className = 'px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1.5 text-slate-600 hover:text-slate-900 hover:bg-slate-100';
-        }
-      });
+      // Reset base styles
+      if (btnAll) {
+        btnAll.className = 'px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1.5 text-slate-600 hover:text-slate-900 hover:bg-slate-100';
+      }
+      if (badgeAll) {
+        badgeAll.className = 'px-1.5 py-0.5 rounded-full text-[10px] font-bold bg-slate-100 text-slate-600 tabular-nums';
+      }
+      if (btnLetters) {
+        btnLetters.className = 'px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1.5 text-slate-600 hover:text-emerald-700 hover:bg-emerald-50';
+      }
+      if (badgeLetters) {
+        badgeLetters.className = 'px-1.5 py-0.5 rounded-full text-[10px] font-bold bg-slate-100 text-slate-600 tabular-nums';
+      }
+      if (btnOrders) {
+        btnOrders.className = 'px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1.5 text-slate-600 hover:text-amber-700 hover:bg-amber-50';
+      }
+      if (badgeOrders) {
+        badgeOrders.className = 'px-1.5 py-0.5 rounded-full text-[10px] font-bold bg-slate-100 text-slate-600 tabular-nums';
+      }
 
       if (cat === 'letters') {
-        if (btnLetters) btnLetters.className = 'px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1.5 bg-emerald-600 text-white shadow-xs';
-        if (typeSelect) {
+        if (btnLetters) {
+          btnLetters.className = 'px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1.5 bg-emerald-600 text-white shadow-xs';
+        }
+        if (badgeLetters) {
+          badgeLetters.className = 'px-1.5 py-0.5 rounded-full text-[10px] font-bold bg-white/20 text-white tabular-nums';
+        }
+        if (typeSelect && typeSelect.dataset.lastMode !== 'letters') {
+          typeSelect.dataset.lastMode = 'letters';
           typeSelect.innerHTML = `
             <option value="">എല്ലാ കത്തുകളും (All Letters)</option>
-            <option value="Inward">ലഭിച്ച കത്ത് (Inward)</option>
-            <option value="Outward">അയച്ച കത്ത് (Outward)</option>
+            <option value="Inward">📥 ലഭിച്ച കത്ത് (Inward)</option>
+            <option value="Outward">📤 അയച്ച കത്ത് (Outward)</option>
           `;
         }
       } else if (cat === 'orders') {
-        if (btnOrders) btnOrders.className = 'px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1.5 bg-amber-600 text-white shadow-xs';
-        if (typeSelect) {
+        if (btnOrders) {
+          btnOrders.className = 'px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1.5 bg-amber-600 text-white shadow-xs';
+        }
+        if (badgeOrders) {
+          badgeOrders.className = 'px-1.5 py-0.5 rounded-full text-[10px] font-bold bg-white/20 text-white tabular-nums';
+        }
+        if (typeSelect && typeSelect.dataset.lastMode !== 'orders') {
+          typeSelect.dataset.lastMode = 'orders';
           typeSelect.innerHTML = `
-            <option value="Order" selected>ഉത്തരവുകൾ & സർക്കുലറുകൾ</option>
+            <option value="Order" selected>📜 ഉത്തരവുകൾ & സർക്കുലറുകൾ</option>
           `;
         }
       } else {
-        if (btnAll) btnAll.className = 'px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1.5 bg-indigo-600 text-white shadow-xs';
-        if (typeSelect) {
+        if (btnAll) {
+          btnAll.className = `px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1.5 ${allActiveBg} text-white shadow-xs`;
+        }
+        if (badgeAll) {
+          badgeAll.className = 'px-1.5 py-0.5 rounded-full text-[10px] font-bold bg-white/20 text-white tabular-nums';
+        }
+        if (typeSelect && typeSelect.dataset.lastMode !== 'all') {
+          typeSelect.dataset.lastMode = 'all';
           typeSelect.innerHTML = `
             <option value="">എല്ലാ ഇനങ്ങളും (All)</option>
-            <option value="Inward">ലഭിച്ച കത്ത് (Inward)</option>
-            <option value="Outward">അയച്ച കത്ത് (Outward)</option>
-            <option value="Order">ഉത്തരവുകൾ / സർക്കുലറുകൾ</option>
+            <option value="Inward">📥 ലഭിച്ച കത്ത് (Inward)</option>
+            <option value="Outward">📤 അയച്ച കത്ത് (Outward)</option>
+            <option value="Order">📜 ഉത്തരവുകൾ / സർക്കുലറുകൾ</option>
           `;
         }
       }
+    }
 
+    window.setDocumentCategoryFilter = function(cat) {
+      window.activeDocumentCategory = cat || 'all';
+      syncCategoryFilterUi();
       if (window.lucide) lucide.createIcons();
+      renderDocuments();
+    };
+
+    window.onDocSubFilterChange = function() {
+      const typeSelect = document.getElementById('doc-filter-type');
+      const val = typeSelect?.value || '';
+      if (val === 'Order' && window.activeDocumentCategory !== 'orders') {
+        window.activeDocumentCategory = 'orders';
+        syncCategoryFilterUi();
+      } else if ((val === 'Inward' || val === 'Outward') && window.activeDocumentCategory === 'orders') {
+        window.activeDocumentCategory = 'letters';
+        syncCategoryFilterUi();
+      }
       renderDocuments();
     };
 
     window.openActiveCouncilDocumentModal = function() {
       const activeCouncil = window.activeDocumentCouncil || 'കേരള സ്റ്റേറ്റ് ലൈബ്രറി കൗൺസിൽ';
-      openDocumentModal(null, activeCouncil);
+      const cat = window.activeDocumentCategory === 'orders' ? 'order' : 'letter';
+      openDocumentModalWithCategory(cat, activeCouncil);
     };
 
     window.openDocumentModalWithCategory = function(cat, councilName) {
       if (councilName) {
-        window.activeDocumentCouncil = councilName;
+        window.activeDocumentCouncil = normalizeCouncilName(councilName);
         updateCouncilCardWorkspaceTheme();
       }
       openDocumentModal(null, councilName || window.activeDocumentCouncil);
@@ -6879,9 +7024,9 @@
     };
 
     window.openDocumentModalWithCouncil = function(councilName) {
-      window.activeDocumentCouncil = councilName;
+      window.activeDocumentCouncil = normalizeCouncilName(councilName);
       updateCouncilCardWorkspaceTheme();
-      openDocumentModal(null, councilName);
+      openDocumentModal(null, window.activeDocumentCouncil);
     };
 
     window.setDocModalCategory = function(cat) {
@@ -7280,16 +7425,13 @@
       };
 
       allDocs.forEach(d => {
-        const c = d.council || 'കേരള സ്റ്റേറ്റ് ലൈബ്രറി കൗൺസിൽ';
-        const isOrder = d.type === 'Order' || (d.subject || '').startsWith('[ഉത്തരവ്');
-        const key = c === 'മലപ്പുറം ജില്ലാ ലൈബ്രറി കൗൺസിൽ' ? 'district'
-          : c === 'തിരൂരങ്ങാടി താലൂക്ക് ലൈബ്രറി കൗൺസിൽ' ? 'taluk'
-          : c === 'മറ്റുള്ളവ' ? 'others'
-          : (['കേരള സ്റ്റേറ്റ് ലൈബ്രറി കൗൺസിൽ', 'സംസ്ഥാനം'].includes(c) ? 'state' : 'others');
-
-        counts[key].total++;
-        if (isOrder) counts[key].orders++;
-        else counts[key].letters++;
+        const isOrder = isDocumentOrder(d);
+        const key = getDocumentCouncilKey(d.council);
+        if (counts[key]) {
+          counts[key].total++;
+          if (isOrder) counts[key].orders++;
+          else counts[key].letters++;
+        }
       });
 
       // Update Card Counter Labels
@@ -7305,18 +7447,16 @@
       setCnt('doc-count-others', 'doc-subcount-others', counts.others);
 
       // Active council subset
+      const activeKey = filterCouncil ? getDocumentCouncilKey(filterCouncil) : '';
       const activeSubset = allDocs.filter(d => {
-        if (!filterCouncil) return true;
-        if (filterCouncil === 'മറ്റുള്ളവ') {
-          return d.council === 'മറ്റുള്ളവ' || !['കേരള സ്റ്റേറ്റ് ലൈബ്രറി കൗൺസിൽ', 'മലപ്പുറം ജില്ലാ ലൈബ്രറി കൗൺസിൽ', 'തിരൂരങ്ങാടി താലൂക്ക് ലൈബ്രറി കൗൺസിൽ'].includes(d.council || '');
-        }
-        return (d.council || 'കേരള സ്റ്റേറ്റ് ലൈബ്രറി കൗൺസിൽ') === filterCouncil;
+        if (!activeKey) return true;
+        return getDocumentCouncilKey(d.council) === activeKey;
       });
 
       // Update Category Badges inside the card
       const totalInView = activeSubset.length;
-      const lettersInView = activeSubset.filter(d => d.type !== 'Order' && !(d.subject || '').startsWith('[ഉത്തരവ്')).length;
-      const ordersInView = activeSubset.filter(d => d.type === 'Order' || (d.subject || '').startsWith('[ഉത്തരവ്')).length;
+      const lettersInView = activeSubset.filter(d => !isDocumentOrder(d)).length;
+      const ordersInView = activeSubset.filter(d => isDocumentOrder(d)).length;
 
       const badgeAll = document.getElementById('doc-badge-all');
       const badgeLetters = document.getElementById('doc-badge-letters');
@@ -7335,13 +7475,14 @@
 
       // Filter rows
       const filtered = activeSubset.filter(doc => {
-        const isOrder = doc.type === 'Order' || (doc.subject || '').startsWith('[ഉത്തരവ്');
+        const isOrder = isDocumentOrder(doc);
         if (filterCat === 'letters' && isOrder) return false;
         if (filterCat === 'orders' && !isOrder) return false;
 
         if (filterType) {
           if (filterType === 'Order' && !isOrder) return false;
-          if (filterType !== 'Order' && doc.type !== filterType) return false;
+          if (filterType === 'Inward' && (isOrder || doc.type === 'Outward')) return false;
+          if (filterType === 'Outward' && (isOrder || doc.type !== 'Outward')) return false;
         }
 
         if (query) {
@@ -7352,13 +7493,24 @@
         return true;
       });
 
+      // Sort chronologically (newest first)
+      filtered.sort((a, b) => {
+        const dateA = a.date || '';
+        const dateB = b.date || '';
+        if (dateA !== dateB) return dateB.localeCompare(dateA);
+        const crA = a.createdAt || '';
+        const crB = b.createdAt || '';
+        if (crA && crB) return crB.localeCompare(crA);
+        return String(b.refNo || '').localeCompare(String(a.refNo || ''));
+      });
+
       if (filtered.length === 0) {
         if (emptyState) emptyState.classList.remove('hidden');
       } else {
         if (emptyState) emptyState.classList.add('hidden');
         filtered.forEach(doc => {
           const safeId = escapeHtml(doc.id);
-          const isOrder = doc.type === 'Order' || (doc.subject || '').startsWith('[ഉത്തരവ്');
+          const isOrder = isDocumentOrder(doc);
           const isInward = doc.type === 'Inward';
 
           const typeBadge = isOrder
@@ -7367,12 +7519,12 @@
               ? '<span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold bg-sky-100 text-sky-800 border border-sky-200">📥 ലഭിച്ച കത്ത് (Inward)</span>'
               : '<span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold bg-emerald-100 text-emerald-800 border border-emerald-200">📤 അയച്ച കത്ത് (Outward)</span>';
 
-          const cName = doc.council || 'കേരള സ്റ്റേറ്റ് ലൈബ്രറി കൗൺസിൽ';
-          const councilBadge = cName === 'മലപ്പുറം ജില്ലാ ലൈബ്രറി കൗൺസിൽ'
+          const cKey = getDocumentCouncilKey(doc.council);
+          const councilBadge = cKey === 'district'
             ? '<span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-bold bg-purple-100 text-purple-800">ജില്ലാ കൗൺസിൽ</span>'
-            : cName === 'തിരൂരങ്ങാടി താലൂക്ക് ലൈബ്രറി കൗൺസിൽ'
+            : cKey === 'taluk'
               ? '<span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-bold bg-teal-100 text-teal-800">താലൂക്ക് കൗൺസിൽ</span>'
-              : cName === 'മറ്റുള്ളവ'
+              : cKey === 'others'
                 ? '<span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-bold bg-amber-100 text-amber-800">മറ്റുള്ളവ</span>'
                 : '<span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-bold bg-indigo-100 text-indigo-800">സംസ്ഥാനം</span>';
 
@@ -7432,6 +7584,7 @@
             }
           } else if (attName) {
             const shortName = attName.length > 16 ? attName.slice(0, 13) + '...' : attName;
+            const lowerName = (attName || '').toLowerCase();
             const isPdf = attType.includes('pdf') || lowerName.endsWith('.pdf');
             const isImg = attType.startsWith('image/') || /\.(png|jpe?g|webp|gif|svg)$/i.test(lowerName);
             const isWord = attType.includes('msword') || attType.includes('wordprocessing') || /\.(doc|docx)$/i.test(lowerName);
@@ -7472,7 +7625,7 @@
             <td data-label="നമ്പർ / Ref No" class="p-3.5 font-mono text-xs font-bold text-slate-800 whitespace-nowrap">${escapeHtml(doc.refNo)}</td>
             <td data-label="തീയതി" class="p-3.5 font-mono tabular-nums text-xs text-slate-500 whitespace-nowrap">${escapeHtml(doc.date)}</td>
             <td data-label="ആരിൽ നിന്ന് / ആർക്ക്" class="p-3.5 text-xs font-semibold text-slate-700">${escapeHtml(doc.party)}</td>
-            <td data-label="വിഷയം" class="p-3.5 text-xs font-medium text-slate-900">${escapeHtml(doc.subject)}</td>
+            <td data-label="വിഷയം" class="p-3.5 text-xs font-medium text-slate-900">${escapeHtml(cleanDocumentSubject(doc.subject))}</td>
             <td data-label="അറ്റാച്ച്മെന്റ്" class="p-3.5 text-center whitespace-nowrap">${attachmentHtml}</td>
             <td data-label="കുറിപ്പുകൾ" class="p-3.5 text-xs text-slate-500 md:max-w-xs md:truncate">${escapeHtml(doc.remarks) || '—'}</td>
             <td data-label="നടപടി" data-actions="true" class="p-3.5 text-right whitespace-nowrap">
@@ -7507,9 +7660,9 @@
         if (item) {
           document.getElementById('modal-doc-title').textContent = 'കത്ത് / ഉത്തരവ് തിരുത്തുക';
           document.getElementById('doc-id').value = item.id;
-          if (councilSelect) councilSelect.value = item.council || 'കേരള സ്റ്റേറ്റ് ലൈബ്രറി കൗൺസിൽ';
+          if (councilSelect) councilSelect.value = normalizeCouncilName(item.council);
 
-          const isOrder = item.type === 'Order' || (item.subject || '').startsWith('[ഉത്തരവ്');
+          const isOrder = isDocumentOrder(item);
           if (isOrder) {
             setDocModalCategory('order');
           } else {
@@ -7520,7 +7673,7 @@
           document.getElementById('doc-form-ref').value = item.refNo || '';
           document.getElementById('doc-form-date').value = item.date || new Date().toISOString().split('T')[0];
           document.getElementById('doc-form-party').value = item.party || '';
-          document.getElementById('doc-form-subject').value = item.subject || '';
+          document.getElementById('doc-form-subject').value = cleanDocumentSubject(item.subject) || '';
           document.getElementById('doc-form-remarks').value = item.remarks || '';
 
           const vault = getDocAttachmentVault();
@@ -7553,13 +7706,18 @@
       if (!requireCloudAuth()) return;
 
       const id = document.getElementById('doc-id').value;
-      const council = document.getElementById('doc-form-council')?.value || 'കേരള സ്റ്റേറ്റ് ലൈബ്രറി കൗൺസിൽ';
-      const type = document.getElementById('doc-form-type').value || 'Inward';
+      const rawCouncil = document.getElementById('doc-form-council')?.value || 'കേരള സ്റ്റേറ്റ് ലൈബ്രറി കൗൺസിൽ';
+      const council = normalizeCouncilName(rawCouncil);
+      const rawType = document.getElementById('doc-form-type')?.value || 'Inward';
+      const isOrder = rawType === 'Order';
+      const type = isOrder ? 'Order' : (rawType === 'Outward' ? 'Outward' : 'Inward');
+
       const refNo = document.getElementById('doc-form-ref').value.trim() || ('DOC-' + Date.now().toString().slice(-6));
       const rawDate = document.getElementById('doc-form-date').value;
       const date = rawDate || new Date().toISOString().split('T')[0];
       const party = document.getElementById('doc-form-party').value.trim() || '—';
-      const subject = document.getElementById('doc-form-subject').value.trim() || 'വിഷയം (No Subject)';
+      const rawSubject = document.getElementById('doc-form-subject').value.trim() || 'വിഷയം (No Subject)';
+      const subject = cleanDocumentSubject(rawSubject);
       const remarks = document.getElementById('doc-form-remarks').value.trim();
       const attachmentName = document.getElementById('doc-attachment-name')?.value || '';
       const attachmentType = document.getElementById('doc-attachment-type')?.value || '';
@@ -7576,13 +7734,14 @@
         });
       }
 
+      // Canonical payload
       const docPayload = {
         type,
         council,
         ref_no: refNo,
         doc_date: date,
         party,
-        subject,
+        subject: isOrder ? `[ഉത്തരവ്] [${council}] ${subject}` : `[${council}] ${subject}`,
         remarks,
         attachment_name: attachmentName,
         attachment_type: attachmentType,
@@ -7601,7 +7760,7 @@
             ref_no: refNo,
             doc_date: date,
             party,
-            subject: type === 'Order' ? `[ഉത്തരവ്] [${council}] ${subject}` : `[${council}] ${subject}`,
+            subject: isOrder ? `[ഉത്തരവ്] [${council}] ${subject}` : `[${council}] ${subject}`,
             remarks: [remarks, attachmentName ? `[Attached: ${attachmentName}]` : ''].filter(Boolean).join(' | ')
           };
           const res = id
@@ -7617,8 +7776,8 @@
             ref_no: refNo,
             doc_date: date,
             party,
-            subject: `[ഉത്തരവ്] ${subject}`,
-            remarks
+            subject: isOrder ? `[ഉത്തരവ്] [${council}] ${subject}` : `[${council}] ${subject}`,
+            remarks: [remarks, attachmentName ? `[Attached: ${attachmentName}]` : ''].filter(Boolean).join(' | ')
           };
           const res = id
             ? await supabaseClient.from('documents').update(fallbackPayload).eq('id', id)
@@ -7704,13 +7863,11 @@
       if (!requireCloudAuth()) return;
       const activeCouncil = window.activeDocumentCouncil;
       const councilLabel = activeCouncil || 'എല്ലാ കൗൺസിലുകളിലെയും';
+      const activeKey = activeCouncil ? getDocumentCouncilKey(activeCouncil) : '';
 
       const targetDocs = (dbState.documents || []).filter(d => {
-        if (!activeCouncil) return true;
-        if (activeCouncil === 'മറ്റുള്ളവ') {
-          return d.council === 'മറ്റുള്ളവ' || !['കേരള സ്റ്റേറ്റ് ലൈബ്രറി കൗൺസിൽ', 'മലപ്പുറം ജില്ലാ ലൈബ്രറി കൗൺസിൽ', 'തിരൂരങ്ങാടി താലൂക്ക് ലൈബ്രറി കൗൺസിൽ'].includes(d.council || '');
-        }
-        return (d.council || 'കേരള സ്റ്റേറ്റ് ലൈബ്രറി കൗൺസിൽ') === activeCouncil;
+        if (!activeKey) return true;
+        return getDocumentCouncilKey(d.council) === activeKey;
       });
 
       const count = targetDocs.length;
@@ -10150,31 +10307,35 @@ window.generateFilesPDF = async function() {
     window.generateLettersPDF = async function() {
       const activeCouncil = window.activeDocumentCouncil || '';
       const activeCat = window.activeDocumentCategory || 'all';
+      const activeKey = activeCouncil ? getDocumentCouncilKey(activeCouncil) : '';
       const filename = `${activeCouncil ? activeCouncil.replace(/\s+/g, '_') : 'Letters_Orders'}_Register_${Date.now()}.pdf`;
 
       const docs = (dbState.documents || []).filter(d => {
-        if (activeCouncil) {
-          if (activeCouncil === 'മറ്റുള്ളവ') {
-            const isKnown = ['കേരള സ്റ്റേറ്റ് ലൈബ്രറി കൗൺസിൽ', 'മലപ്പുറം ജില്ലാ ലൈബ്രറി കൗൺസിൽ', 'തിരൂരങ്ങാടി താലൂക്ക് ലൈബ്രറി കൗൺസിൽ'].includes(d.council || '');
-            if (isKnown && d.council !== 'മറ്റുള്ളവ') return false;
-          } else if ((d.council || 'കേരള സ്റ്റേറ്റ് ലൈബ്രറി കൗൺസിൽ') !== activeCouncil) {
-            return false;
-          }
-        }
-        const isOrder = d.type === 'Order' || (d.subject || '').startsWith('[ഉത്തരവ്');
+        if (activeKey && getDocumentCouncilKey(d.council) !== activeKey) return false;
+        const isOrder = isDocumentOrder(d);
         if (activeCat === 'letters' && isOrder) return false;
         if (activeCat === 'orders' && !isOrder) return false;
         return true;
       });
 
+      docs.sort((a, b) => {
+        const dateA = a.date || '';
+        const dateB = b.date || '';
+        if (dateA !== dateB) return dateB.localeCompare(dateA);
+        const crA = a.createdAt || '';
+        const crB = b.createdAt || '';
+        if (crA && crB) return crB.localeCompare(crA);
+        return String(b.refNo || '').localeCompare(String(a.refNo || ''));
+      });
+
       const rows = docs.length > 0
         ? docs.map(d => [
             d.council || 'കേരള സ്റ്റേറ്റ് ലൈബ്രറി കൗൺസിൽ',
-            d.type === 'Order' ? 'ഉത്തരവ് / സർക്കുലർ' : d.type === 'Inward' ? 'ഇൻവേർഡ് (ലഭിച്ചത്)' : 'ഔട്ട്‌വേർഡ് (അയച്ചത്)',
+            isDocumentOrder(d) ? 'ഉത്തരവ് / സർക്കുലർ' : d.type === 'Inward' ? 'ഇൻവേർഡ് (ലഭിച്ചത്)' : 'ഔട്ട്‌വേർഡ് (അയച്ചത്)',
             d.refNo || '—',
             d.date || '—',
             d.party || '—',
-            d.subject || '—',
+            cleanDocumentSubject(d.subject) || '—',
             (d.attachmentName || d.attachmentData) ? `ഉണ്ട് (${d.attachmentName || 'ഫയൽ'})` : 'ഇല്ല',
             d.remarks || '—'
           ])
